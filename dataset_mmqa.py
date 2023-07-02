@@ -9,7 +9,13 @@ class MMQAQuestionAnswerPairs(Dataset):
     
     def __init__(self, filename):
         self.data = utils.load_jsonl_file(filename)
-
+        filtered_data = []
+        for point in data:
+            modalities = point["metadata"]["modalities"]
+            if "table" not in modalities:
+                filtered_data.append(point)
+        self.data = filtered_data
+        
     def __len__(self):
         return len(self.data)
 
