@@ -27,12 +27,11 @@ parser.add_argument('--output_idx', type=int, default=0)
 args = parser.parse_args()
 
 import sys
-sys.path.append("/home/yingshac/CYS/WebQnA/VLP/BARTScore")
+sys.path.append("/soe/sgarg6/capstone/rag-multimodal-qa/BARTScore")
 from bart_score import BARTScorer
 
 bart_scorer_ParaBank = BARTScorer(device='cuda:0', checkpoint='facebook/bart-large-cnn')
-bart_scorer_ParaBank.load(path='/home/yingshac/CYS/WebQnA/VLP/BARTScore/bart.pth') # Please change the path to bart.pth
-
+bart_scorer_ParaBank.load(path='/data/users/sgarg6/capstone/BARTScore/bart.pth') # Please change the path to bart.pth
 
 def detectNum(l):
     result = []
