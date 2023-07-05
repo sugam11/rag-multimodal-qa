@@ -1,5 +1,5 @@
-from torch.utils.data import Dataset
-
+from torch.utils.data import Dataset, DataLoader
+import utils
 
 class MMQAQuestionAnswerPairs(Dataset):
     """
@@ -10,7 +10,7 @@ class MMQAQuestionAnswerPairs(Dataset):
     def __init__(self, filename):
         self.data = utils.load_jsonl_file(filename)
         filtered_data = []
-        for point in data:
+        for point in self.data:
             modalities = point["metadata"]["modalities"]
             if "table" not in modalities:
                 filtered_data.append(point)

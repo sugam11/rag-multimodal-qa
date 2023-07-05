@@ -1,6 +1,9 @@
 from open_flamingo import create_model_and_transforms
+from torch.utils.data import Dataset, DataLoader
 from huggingface_hub import hf_hub_download
 import torch
+import dataset_mmqa
+from PIL import Image
 
 class FlamingoBaseline:
     def __init__(self):
@@ -14,8 +17,8 @@ class FlamingoBaseline:
 
     """
     Preprocessing images
-    Details: For OpenFlamingo, we expect the image to be a torch tensor of shape 
-     batch_size x num_media x num_frames x channels x height x width. 
+    Details: For OpenFlamingo, we expect the image to be a torch tensor of shape
+     batch_size x num_media x num_frames x channels x height x width.
      In this case batch_size = 1, num_media = 3, num_frames = 1,
      channels = 3, height = 224, width = 224.
     """
@@ -28,7 +31,7 @@ class FlamingoBaseline:
     """
     Preprocessing text
     Details: In the text we expect an <image> special token to indicate where an image is.
-     We also expect an <|endofchunk|> special token to indicate the end of the text 
+     We also expect an <|endofchunk|> special token to indicate the end of the text
      portion associated with an image.
     """
     def process_text(self, txt):
@@ -47,7 +50,15 @@ class FlamingoBaseline:
             lang_x=lang_x["input_ids"],
             attention_mask=lang_x["attention_mask"],
             max_new_tokens=20,
-            num_beams=3,
+            num_beams=1,
         )
         print("Generated Answer: ", self.tokenizer.decode(generated_text[0]))
 
+
+dev_data = dataset_mmqa.MMQAQuestionAnswerPairs("MMQA_dev.jsonl")
+loader = DataLoader(dev_data)
+baseline = FlamingoBaseline()
+
+demo_image_one = Image.open('1x1_#FFFFFFFF.png')
+for x in dev_data:
+    baseline.generate_answer([demo_image_one], "Who is the US president?")
