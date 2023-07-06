@@ -60,5 +60,9 @@ loader = DataLoader(dev_data)
 baseline = FlamingoBaseline()
 
 demo_image_one = Image.open('1x1_#FFFFFFFF.png')
-for x in dev_data:
-    baseline.generate_answer([demo_image_one], "Who is the US president?")
+demo_qs = ['Who is the current president of the United States?', 'What does the president do?', 'What is 10 + 4?',
+           'What colour is the sky', 'What is the meaning of life?', 'Who won the oscar for best actor in 2010?',
+           'Does changing the colour of the input image change your generation?', 'What are the steps to make a pizza?',
+           'What is the secret to happiness?']
+for x in demo_qs:
+    baseline.generate_answer([demo_image_one], x)
