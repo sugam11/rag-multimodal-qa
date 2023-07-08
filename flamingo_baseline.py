@@ -29,6 +29,7 @@ if data_set == "MMQA":
 			f.write(json.dumps(line) + "\n")
 	f.close()
 
+
 if data_set == "webQA":
 	data = dataset_mmqa.MMQAQuestionAnswerPairs("MMQA_dev.jsonl")
 	data_loader = DataLoader(data)
@@ -42,7 +43,7 @@ if data_set == "webQA":
 		ans = baseline.generate_answer([blank_image], ques)
 		answers[qid] = ans
 
-	with  open("MMQA_baseline_out.json", "w", encoding="utf-8") as f:
+	with  open("WebQA_baseline_out.json", "w", encoding="utf-8") as f:
 		for k, v in answers.items():
 			line = {"qid": k, "answer": ' '.join(v.split())}
 			f.write(json.dumps(line) + "\n")
