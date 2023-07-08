@@ -40,7 +40,7 @@ class FlamingoBaseline:
         return lang_x
 
     """
-    Generate text
+    Generate Answer:
     """
     def generate_answer(self, imgs, txt):
         vision_x = self.process_imgs(imgs)
@@ -52,17 +52,5 @@ class FlamingoBaseline:
             max_new_tokens=20,
             num_beams=1,
         )
-        print("Generated Answer: ", self.tokenizer.decode(generated_text[0]))
-
-
-dev_data = dataset_mmqa.MMQAQuestionAnswerPairs("MMQA_dev.jsonl")
-loader = DataLoader(dev_data)
-baseline = FlamingoBaseline()
-
-demo_image_one = Image.open('1x1_#FFFFFFFF.png')
-demo_qs = ['Who is the current president of the United States?', 'What does the president do?', 'What is 10 + 4?',
-           'What colour is the sky', 'What is the meaning of life?', 'Who won the oscar for best actor in 2010?',
-           'Does changing the colour of the input image change your generation?', 'What are the steps to make a pizza?',
-           'What is the secret to happiness?']
-for x in demo_qs:
-    baseline.generate_answer([demo_image_one], x)
+        answer = self.tokenizer.decode(generated_text[0])
+        return answer
