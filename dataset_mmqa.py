@@ -1,6 +1,19 @@
-from torch.utils.data import Dataset, DataLoader
-import utils
+from torch.utils.data import Dataset
+import data_utils
 
+class MMQAQuestionAnswer:
+    def __init__(self, train_file, val_file):
+        if train_file is not None:
+            self.train_dataset = MMQAQuestionAnswerPairs(train_file)
+        if val_file is not None:
+            self.val_dataset = MMQAQuestionAnswerPairs(val_file)
+    
+    def get_train_split(self,):
+        return self.train_dataset
+    
+    def get_val_split(self,):
+        return self.val_dataset
+    
 class MMQAQuestionAnswerPairs(Dataset):
     """
         Usage Sample: 
