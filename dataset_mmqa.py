@@ -21,7 +21,7 @@ class MMQAQuestionAnswerPairs(Dataset):
     """
     
     def __init__(self, filename):
-        self.data = utils.load_jsonl_file(filename)
+        self.data = data_utils.load_jsonl_file(filename)
         filtered_data = []
         for point in self.data:
             modalities = point["metadata"]["modalities"]
@@ -52,9 +52,9 @@ class MMQAKnowledgeBase:
           
     """
     def __init__(self, text_kb_path, img_kb_path):
-        self.text_kb = utils.load_jsonl_file(text_kb_path)
+        self.text_kb = data_utils.load_jsonl_file(text_kb_path)
         print(f"Loaded {len(self.text_kb)} text passages")
-        self.img_kb = utils.load_jsonl_file(img_kb_path)
+        self.img_kb = data_utils.load_jsonl_file(img_kb_path)
         print(f"Loaded {len(self.img_kb)} image sources")
 
     def get_all_images(self):
