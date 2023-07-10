@@ -1,24 +1,37 @@
 # Author: Apala Thakur
 # WebQA dataset interface 
 from torch.utils.data import Dataset
-import webqa_utils
+import data_utils
 
+
+class WebQAQuestionAnswer:
+    def __init__(self, filename):
+        self.train, self.val = data_utils.read_train_val(filename)
+        self.train_dataset = WebQAQuestionAnswerPairs(self.train)
+        self.val_dataset = WebQAQuestionAnswerPairs(self.val)
+    
+    def get_train_split(self,):
+        return self.train_dataset
+    
+    def get_val_split(self,):
+        return self.val_dataset
+        
 class WebQAQuestionAnswerPairs(Dataset):
     
-    def __init__(self,filename):
-        self.train, self.val = webqa_utils.read_train_val(filename)
+    def __init__(self, data):
+        self.data = data
     
     def __len__(self):
-        return len(self.train)
+        return len(self.data)
     
     def __getitem__(self, index):
-        data = self.train[index]
-        return data['Q'], data['Guid'], data['A']
+        sample = self.data[index]
+        return sample['Q'], sample['Guid'], sample['A']
             
 class WebQAKnowledgeBase: 
     
     def __init__(self,filename):
-        self.train, self.val = webqa_utils.read_train_val(filename)
+        self.train, self.val = data_utils.read_train_val(filename)
         
     def get_all_images(self):
         '''

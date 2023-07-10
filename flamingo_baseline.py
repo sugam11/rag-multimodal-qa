@@ -11,12 +11,14 @@ optparser.add_option("-d", "--data", dest="data_set", default='MMQA', help="MMQA
 
 data_set = 'MMQA'
 if data_set == "MMQA":
-	data = dataset_mmqa.MMQAQuestionAnswerPairs("MMQA_dev.jsonl")
+	mmqa_data = dataset_mmqa.MMQAQuestionAnswer(None, "MMQA_dev.jsonl")
+	data = mmqa_data.get_val_split()
 	data_loader = DataLoader(data)
 	baseline = flamingo_model.FlamingoBaseline()
 	blank_image = Image.open('1x1_#00000000.png')
 
 	answers = {}
+	python ("Generating Answers")
 	for x in data_loader:
 		ques = x[0][0]
 		qid = x[1][0]
