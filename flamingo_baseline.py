@@ -26,7 +26,7 @@ def generate_output(baseline, data):
 
 	path = opts.data_set +"_base_dev.json"
 	with open(path, "w") as outfile:
-    		json.dump(answers, outfile)
+		json.dump(answers, outfile)
 
 	path = opts.data_set +"_base_dev_pretty.json"
 	with  open(path, "w", encoding="utf-8") as f:
@@ -37,7 +37,7 @@ def generate_output(baseline, data):
 if opts.data_set == "MMQA":
 	data = dataset_mmqa.MMQAQuestionAnswerPairs("/data/users/sgarg6/capstone/multimodalqa/MMQA_dev.jsonl")
 	data_loader = DataLoader(data)
-	baseline = flamingo_model.FlamingoBaseline()
+	baseline = flamingo_model.FlamingoModel()
 
 	generate_output(baseline, data_loader)
 
@@ -45,6 +45,6 @@ if opts.data_set == "webQA":
 	webQA = dataset_webqa.WebQAQuestionAnswer("/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json")
 	data = webQA.get_val_split()
 	data_loader = DataLoader(data)
-	baseline = flamingo_model.FlamingoBaseline()
+	baseline = flamingo_model.FlamingoModel()
 
 	generate_output(baseline, data_loader)
