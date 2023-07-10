@@ -28,23 +28,23 @@ def run_experiment(model, run_on=["MMQA", "WebQA"]):
             "MMQA", "val"
         )
         data_loader = DataLoader(data)
-        generate_output(model, data_loader)
+        generate_output(1, model, data_loader)
 
     if "WebQA" in run_on:
         data = qa_dataset.get_dataset(
             "WebQA", "val"
         )
         data_loader = DataLoader(data)
-        generate_output(model, data_loader)
+        generate_output(1, model, data_loader)
 
 
-def generate_output(baseline, data):
+def generate_output(beams, baseline, data):
     blank_image = Image.open("1x1_#00000000.png")
     answers = {}
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
-        ans = baseline.generate_answer([blank_image], ques)
+        ans = baseline.generate_answer(beams, [blank_image], ques)
         answers[qid] = ans
 
     path = opts.data_set + "_base_dev.json"
@@ -56,7 +56,6 @@ def generate_output(baseline, data):
         for k, v in answers.items():
             line = {"qid": k, "answer": " ".join(v.split())}
             f.write(json.dumps(line) + "\n")
-
 
 if __name__ == "__main__":
     model = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
