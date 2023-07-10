@@ -3,8 +3,7 @@ import os
 os.environ["TRANSFORMERS_CACHE"] = "/data/users/bfarrell/models/"
 
 import flamingo_model
-import dataset_mmqa
-import dataset_webqa
+from data_loaders import qa_dataset
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import sys
@@ -14,9 +13,29 @@ from tqdm import tqdm
 
 optparser = optparse.OptionParser()
 optparser.add_option(
-    "-d", "--data", dest="data_set", default="MMQA", help="MMQA or webQA data"
+    "-d",
+    "--data",
+    dest="data_set",
+    default=["MMQA", "WebQA"],
+    help="MMQA or webQA data or both",
 )
 (opts, _) = optparser.parse_args()
+
+
+def run_experiment(model, run_on=["MMQA", "WebQA"]):
+    if "MMQA" in run_on:
+        data = qa_dataset.get_dataset(
+            "MMQA", "val"
+        )
+        data_loader = DataLoader(data)
+        generate_output(1, model, data_loader)
+
+    if "WebQA" in run_on:
+        data = qa_dataset.get_dataset(
+            "WebQA", "val"
+        )
+        data_loader = DataLoader(data)
+        generate_output(1, model, data_loader)
 
 
 def generate_output(beams, baseline, data):
@@ -38,22 +57,9 @@ def generate_output(beams, baseline, data):
             line = {"qid": k, "answer": " ".join(v.split())}
             f.write(json.dumps(line) + "\n")
 
-
-if opts.data_set == "MMQA":
-    data = dataset_mmqa.MMQAQuestionAnswerPairs(
-        "/data/users/sgarg6/capstone/multimodalqa/MMQA_dev.jsonl"
-    )
-    data_loader = DataLoader(data)
-    baseline = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
-
-    generate_output(1, baseline, data_loader)
-
-if opts.data_set == "webQA":
-    webQA = dataset_webqa.WebQAQuestionAnswer(
-        "/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json"
-    )
-    data = webQA.get_val_split()
-    data_loader = DataLoader(data)
-    baseline = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
-
-    generate_output(1, baseline, data_loader)
+if __name__ == "__main__":
+    model = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
+    if type(opts.data_set) == "str":
+        opts.data_set = [opts.data_set]
+    print(f"Running Experiment on {opts.data_set}")
+    run_experiment(model, opts.data_set)
