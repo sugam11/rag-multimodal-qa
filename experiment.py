@@ -14,9 +14,29 @@ from tqdm import tqdm
 
 optparser = optparse.OptionParser()
 optparser.add_option(
-    "-d", "--data", dest="data_set", default="MMQA", help="MMQA or webQA data"
+    "-d",
+    "--data",
+    dest="data_set",
+    default=["MMQA", "WebQA"],
+    help="MMQA or webQA data or both",
 )
 (opts, _) = optparser.parse_args()
+
+
+def run_experiment(model, run_on=["MMQA", "WebQA"]):
+    if "MMQA" in run_on:
+        data = dataset_mmqa.MMQAQuestionAnswerPairs(
+            "/data/users/sgarg6/capstone/multimodalqa/MMQA_dev.jsonl"
+        )
+        data_loader = DataLoader(data)
+        generate_output(model, data_loader)
+
+    if "WebQA" in run_on:
+        data = dataset_webqa.WebQAQuestionAnswer(
+            "/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json"
+        ).get_val_split()
+        data_loader = DataLoader(data)
+        generate_output(model, data_loader)
 
 
 def generate_output(baseline, data):
@@ -39,21 +59,9 @@ def generate_output(baseline, data):
             f.write(json.dumps(line) + "\n")
 
 
-if opts.data_set == "MMQA":
-    data = dataset_mmqa.MMQAQuestionAnswerPairs(
-        "/data/users/sgarg6/capstone/multimodalqa/MMQA_dev.jsonl"
-    )
-    data_loader = DataLoader(data)
-    baseline = flamingo_model.FlamingoModel()
-
-    generate_output(baseline, data_loader)
-
-if opts.data_set == "webQA":
-    webQA = dataset_webqa.WebQAQuestionAnswer(
-        "/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json"
-    )
-    data = webQA.get_val_split()
-    data_loader = DataLoader(data)
-    baseline = flamingo_model.FlamingoModel()
-
-    generate_output(baseline, data_loader)
+if __name__ == "__main__":
+    model = flamingo_model.FlamingoModel()
+    if type(opts.data_set) == "str":
+        opts.data_set = [opts.data_set]
+    print(f"Running Experiment on {opts.data_set}")
+    run_experiment(model, opts.data_set)
