@@ -19,13 +19,13 @@ optparser.add_option(
 (opts, _) = optparser.parse_args()
 
 
-def generate_output(baseline, data):
+def generate_output(beams, baseline, data):
     blank_image = Image.open("1x1_#00000000.png")
     answers = {}
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
-        ans = baseline.generate_answer([blank_image], ques)
+        ans = baseline.generate_answer(beams, [blank_image], ques)
         answers[qid] = ans
 
     path = opts.data_set + "_base_dev.json"
@@ -44,9 +44,9 @@ if opts.data_set == "MMQA":
         "/data/users/sgarg6/capstone/multimodalqa/MMQA_dev.jsonl"
     )
     data_loader = DataLoader(data)
-    baseline = flamingo_model.FlamingoModel()
+    baseline = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
 
-    generate_output(baseline, data_loader)
+    generate_output(1, baseline, data_loader)
 
 if opts.data_set == "webQA":
     webQA = dataset_webqa.WebQAQuestionAnswer(
@@ -54,6 +54,6 @@ if opts.data_set == "webQA":
     )
     data = webQA.get_val_split()
     data_loader = DataLoader(data)
-    baseline = flamingo_model.FlamingoModel()
+    baseline = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
 
-    generate_output(baseline, data_loader)
+    generate_output(1, baseline, data_loader)
