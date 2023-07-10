@@ -1,5 +1,5 @@
 from torch.utils.data import Dataset
-import data_utils
+from data_loaders import data_utils
 
 
 class MMQAQuestionAnswer:

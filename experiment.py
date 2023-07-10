@@ -3,8 +3,7 @@ import os
 os.environ["TRANSFORMERS_CACHE"] = "/data/users/bfarrell/models/"
 
 import flamingo_model
-import dataset_mmqa
-import dataset_webqa
+from data_loaders import qa_dataset
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import sys
@@ -25,16 +24,16 @@ optparser.add_option(
 
 def run_experiment(model, run_on=["MMQA", "WebQA"]):
     if "MMQA" in run_on:
-        data = dataset_mmqa.MMQAQuestionAnswerPairs(
-            "/data/users/sgarg6/capstone/multimodalqa/MMQA_dev.jsonl"
+        data = qa_dataset.get_dataset(
+            "MMQA", "val"
         )
         data_loader = DataLoader(data)
         generate_output(model, data_loader)
 
     if "WebQA" in run_on:
-        data = dataset_webqa.WebQAQuestionAnswer(
-            "/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json"
-        ).get_val_split()
+        data = qa_dataset.get_dataset(
+            "WebQA", "val"
+        )
         data_loader = DataLoader(data)
         generate_output(model, data_loader)
 
@@ -60,8 +59,8 @@ def generate_output(baseline, data):
 
 
 if __name__ == "__main__":
-    model = flamingo_model.FlamingoModel()
+    # model = flamingo_model.FlamingoModel()
     if type(opts.data_set) == "str":
         opts.data_set = [opts.data_set]
     print(f"Running Experiment on {opts.data_set}")
-    run_experiment(model, opts.data_set)
+    run_experiment(None, opts.data_set)

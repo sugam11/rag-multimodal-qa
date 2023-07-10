@@ -1,7 +1,7 @@
 # Author: Apala Thakur
 # WebQA dataset interface
 from torch.utils.data import Dataset
-import data_utils
+from data_loaders import data_utils
 
 
 class WebQAQuestionAnswer:
