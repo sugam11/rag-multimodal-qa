@@ -24,11 +24,11 @@ def generate_output(baseline, data):
 		ans = baseline.generate_answer([blank_image], ques)
 		answers[qid] = ans
 
-	path = opts.data_set +"_dev.json"
+	path = opts.data_set +"_base_dev.json"
 	with open(path, "w") as outfile:
     		json.dump(answers, outfile)
 
-	path = opts.data_set +"_dev_pretty.json"
+	path = opts.data_set +"_base_dev_pretty.json"
 	with  open(path, "w", encoding="utf-8") as f:
 		for k, v in answers.items():
 			line = {"qid": k, "answer": ' '.join(v.split())}
