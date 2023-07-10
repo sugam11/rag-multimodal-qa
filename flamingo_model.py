@@ -3,6 +3,7 @@ from torch.utils.data import Dataset, DataLoader
 from huggingface_hub import hf_hub_download
 import torch
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class FlamingoBaseline:
     def __init__(self):
@@ -13,6 +14,7 @@ class FlamingoBaseline:
             tokenizer_path="anas-awadalla/mpt-1b-redpajama-200b",
             cross_attn_every_n_layers=1
         )
+        self.model = self.model.to(device)
 
     """
     Preprocessing images
@@ -25,7 +27,7 @@ class FlamingoBaseline:
         vision_x = [self.image_processor(x).unsqueeze(0) for x in imgs]
         vision_x = torch.cat(vision_x, dim=0)
         vision_x = vision_x.unsqueeze(1).unsqueeze(0)
-        return vision_x
+        return vision_x.to(device)
 
     """
     Preprocessing text
@@ -36,7 +38,7 @@ class FlamingoBaseline:
     def process_text(self, txt):
         self.tokenizer.padding_side = "left" # For generation padding tokens should be on the left
         lang_x = self.tokenizer([txt], return_tensors="pt",)
-        return lang_x
+        return lang_x.to(device)
 
     """
     Generate Answer
