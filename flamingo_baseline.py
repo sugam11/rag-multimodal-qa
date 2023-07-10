@@ -19,6 +19,7 @@ def generate_output(baseline, data):
 	blank_image = Image.open('1x1_#00000000.png')
 	answers = {}
 	for x in tqdm(data, position=0, leave=True):
+	for x in data_loader:
 		ques = x[0][0]
 		qid = x[1][0]
 		ans = baseline.generate_answer([blank_image], ques)
