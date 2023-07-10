@@ -59,8 +59,8 @@ def generate_output(baseline, data):
 
 
 if __name__ == "__main__":
-    # model = flamingo_model.FlamingoModel()
+    model = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
     if type(opts.data_set) == "str":
         opts.data_set = [opts.data_set]
     print(f"Running Experiment on {opts.data_set}")
-    run_experiment(None, opts.data_set)
+    run_experiment(model, opts.data_set)
