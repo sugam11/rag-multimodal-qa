@@ -3,7 +3,7 @@ os.environ['TRANSFORMERS_CACHE'] = '/data/users/bfarrell/models/'
 
 import flamingo_model
 import dataset_mmqa
-import webqa_dataset
+import dataset_webqa
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import sys
@@ -19,7 +19,6 @@ def generate_output(baseline, data):
 	blank_image = Image.open('1x1_#00000000.png')
 	answers = {}
 	for x in tqdm(data, position=0, leave=True):
-	for x in data_loader:
 		ques = x[0][0]
 		qid = x[1][0]
 		ans = baseline.generate_answer([blank_image], ques)
@@ -43,7 +42,8 @@ if opts.data_set == "MMQA":
 	generate_output(baseline, data_loader)
 
 if opts.data_set == "webQA":
-	data = webqa_dataset.WebQAQuestionAnswerPairs("/data/users/sgarg6/capstone/webqa/data/WebQA_test.json")
+	webQA = dataset_webqa.WebQAQuestionAnswer("/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json")
+	data = webQA.get_val_split()
 	data_loader = DataLoader(data)
 	baseline = flamingo_model.FlamingoBaseline()
 
