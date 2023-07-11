@@ -30,7 +30,7 @@ class WebQAKnowledgeBase:
         '''
         
         img = []
-        for k,v in self.train.items():
+        for v in self.train:
             img += v['img_posFacts'] + v['img_negFacts']
         
         for image in img: 
@@ -48,7 +48,7 @@ class WebQAKnowledgeBase:
          'text': ''}
         '''
         txt = []
-        for k,v in self.train.items():
+        for v in self.train:
             txt += v["txt_posFacts"] + v["txt_negFacts"]
         
         for text in txt:
