@@ -84,4 +84,4 @@ class MMQAKnowledgeBase:
          'text': ''}
         """
         for text in self.text_kb:
-            return text
+            yield text
