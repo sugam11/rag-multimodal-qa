@@ -1,7 +1,4 @@
 import os
-
-os.environ["TRANSFORMERS_CACHE"] = "/data/users/bfarrell/models/"
-
 import flamingo_model
 from data_loaders import qa_dataset
 from torch.utils.data import Dataset, DataLoader
