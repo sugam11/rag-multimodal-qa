@@ -61,7 +61,7 @@ class WebQAKnowledgeBase:
                 }
             )
 
-    def get_all_text(self):
+    def get_all_texts(self):
         """
         returns {'title': '',
          'url': '',
