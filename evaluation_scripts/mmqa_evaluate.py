@@ -223,6 +223,9 @@ def evaluate_prediction_file(prediction_path, gold_path):
         # Even if there are multiple entries in example["answers"], the whole list should be regarded as one ref answer.
         # However, our script supports evaluation with multiple ref answers.
         # So, we will use an outer bracket here to pretend we have a list of ref answers.
+
+        if "table" in example["metadata"]["modalities"]:
+            continue
         gold_answer = [str(item["answer"]) for item in example["answers"]]
         gold_answers[qid] = [gold_answer]
         answer_modality = set([item["modality"] for item in example["answers"]])
