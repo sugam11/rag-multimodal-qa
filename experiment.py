@@ -25,14 +25,14 @@ def run_experiment(model, run_on=["MMQA", "WebQA"]):
             "MMQA", "val"
         )
         data_loader = DataLoader(data)
-        generate_output(1, model, data_loader)
+        generate_output(3, model, data_loader)
 
     if "WebQA" in run_on:
         data = qa_dataset.get_dataset(
             "WebQA", "val"
         )
         data_loader = DataLoader(data)
-        generate_output(1, model, data_loader)
+        generate_output(3, model, data_loader)
 
 
 def generate_output(beams, baseline, data):
