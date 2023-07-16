@@ -40,8 +40,9 @@ def generate_output(beams, baseline, data):
     answers = {}
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
+	question = "Q:" + ques + "A:"
         qid = x[1][0]
-        ans = baseline.generate_answer(beams, [blank_image], ques)
+        ans = baseline.generate_answer(beams, [blank_image], question)
         answers[qid] = ans
 
     path = opts.data_set + "_base_dev.json"
