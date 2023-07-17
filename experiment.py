@@ -1,5 +1,4 @@
 import os
-os.environ['TRANSFORMERS_CACHE'] = '/data/users/bfarrell/models/'
 import flamingo_model
 from data_loaders import qa_dataset
 from torch.utils.data import Dataset, DataLoader
@@ -49,6 +48,7 @@ def generate_output_mmqa(beams, baseline, data):
         qid = x[1][0]
         question = "Q:" + ques + "A:"
         ans = baseline.generate_answer(beams, [blank_image], question)
+        ans = ''.join(ans.splitlines())
         answers[qid] = ans
         df['qid'].append(qid)
         df['Q'].append(ques)
@@ -63,31 +63,31 @@ def generate_output_mmqa(beams, baseline, data):
 
 def generate_output_webqa(beams, baseline, data):
     blank_image = Image.open("resources/1x1_#00000000.png")
-    answers = {}
     df = {'qid':[],
                'Qcate':[],
                'Q':[],
                'A':[],
-               'Keywords_A':[]
+               'Keywords_A':[],
                'Output_conf':[],
                'Output':[]
     }
+    count = 0 
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
         question = "Q:" + ques + "A:"
         ans = baseline.generate_answer(beams, [blank_image], question)
-        answers[qid] = ans
+        ans = ''.join(ans.splitlines())
         df['qid'].append(qid)
         df['Qcate'].append(x[3][0])
         df['Q'].append(ques)
         df['A'].append(x[2][0])
-        df['Keywords_A'].append(x[4][0])
+        df['Keywords_A'].append("TBD")
         df['Output_conf'].append(1)
         df['Output'].append(ans)
 
     df = pd.DataFrame(df)
-    df.to_csv("webqa_base_dev.tsv", header=['#','Guid','Qcate','Q','A','Keywords_A','Output_conf','Output'])
+    df.to_csv("webqa_base_dev.tsv", header=['Guid','Qcate','Q','A','Keywords_A','Output_conf','Output'])
 
 
 if __name__ == "__main__":
