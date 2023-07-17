@@ -9,7 +9,7 @@ class RedpajamaModel:
         self.model = AutoModelForCausalLM.from_pretrained("togethercomputer/RedPajama-INCITE-Instruct-3B-v1", torch_dtype=torch.float16)
         self.model = model.to('cuda:0')
 
-    def gen_answer(self, prompt):
+    def generate_answer(self, prompt):
         inputs = tokenizer(prompt, return_tensors='pt').to(model.device)
         input_length = inputs.input_ids.shape[1]
         outputs = model.generate(
