@@ -9,6 +9,7 @@ import json
 from tqdm import tqdm
 import pandas as pd
 
+
 optparser = optparse.OptionParser()
 optparser.add_option(
     "-d",
@@ -96,3 +97,6 @@ if __name__ == "__main__":
         opts.data_set = [opts.data_set]
     print(f"Running Experiment on {opts.data_set}")
     run_experiment(model, opts.data_set)
+    model = redpajama_model.RedpajamaModel()
+    run_experiment(model, opts.data_set)
+
