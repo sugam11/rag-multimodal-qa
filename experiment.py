@@ -1,5 +1,4 @@
 import os
-
 import flamingo_model
 import redpajama_model#
 from data_loaders import qa_dataset
@@ -23,23 +22,23 @@ optparser.add_option(
 (opts, _) = optparser.parse_args()
 
 
-def run_experiment(model, run_on=["MMQA", "WebQA"]):
+def run_experiment(model,f_prefix, run_on=["MMQA", "WebQA"]):
     if "MMQA" in run_on:
         data = qa_dataset.get_dataset(
             "MMQA", "val"
         )
         data_loader = DataLoader(data)
-        generate_output_mmqa(3, model, data_loader)
+        generate_output_mmqa(3, model, data_loader, f_prefix)
 
     if "WebQA" in run_on:
         data = qa_dataset.get_dataset(
             "WebQA", "val"
         )
-        data_loader = DataLoader(data)
-        generate_output_webqa(3, model, data_loader)
+        #data_loader = DataLoader(data)
+        #generate_output_webqa(3, model, data_loader)
 
 
-def generate_output_mmqa(beams, baseline, data):
+def generate_output_mmqa(beams, baseline, data, f_prefix):
     blank_image = Image.open("resources/1x1_#00000000.png")
     answers = {}
     df = {'qid':[],
@@ -56,11 +55,13 @@ def generate_output_mmqa(beams, baseline, data):
         df['qid'].append(qid)
         df['Q'].append(ques)
         df['A'].append(ans)
-
+    
     df = pd.DataFrame(df)
-    df.to_csv("mmqa_base_dev.csv")
+    path = f_prefix + "_mmqa_base_dev.csv"
+    df.to_csv(path)
 
-    with open("mmqa_base_dev_.json", "w") as outfile:
+    path = f_prefix + "_mmqa_base_dev.json"
+    with open(path, "w") as outfile:
         json.dump(answers, outfile)
      
 
@@ -74,7 +75,6 @@ def generate_output_webqa(beams, baseline, data):
                'Output_conf':[],
                'Output':[]
     }
-    count = 0 
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
@@ -94,11 +94,11 @@ def generate_output_webqa(beams, baseline, data):
 
 
 if __name__ == "__main__":
-    #model = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
+    model = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
     if type(opts.data_set) == "str":
         opts.data_set = [opts.data_set]
     print(f"Running Experiment on {opts.data_set}")
-    #run_experiment(model, opts.data_set)
-    model = redpajama_model.RedpajamaModel()
-    run_experiment(model, opts.data_set)
+    run_experiment(model,"openf", opts.data_set)
+    #model = redpajama_model.RedpajamaModel()
+    #run_experiment(model,"redpj", opts.data_set)
 
