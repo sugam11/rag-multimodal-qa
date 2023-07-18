@@ -2,6 +2,9 @@
 # WebQA dataset interface
 from torch.utils.data import Dataset
 from data_loaders import data_utils
+from PIL import Image
+from io import BytesIO
+import base64
 
 
 class WebQAQuestionAnswer:
@@ -34,9 +37,22 @@ class WebQAQuestionAnswerPairs(Dataset):
 
 
 class WebQAKnowledgeBase:
-    def __init__(self, filename):
-        self.train, self.val = data_utils.read_train_val(filename)
-
+    def __init__(self, datafile, imgtsvfile):
+        self.train, self.val = data_utils.read_train_val(datafile)
+        self.imgDict={}
+        with open(imgtsvfile, "r") as fp:
+            lines = fp.readlines()
+            
+        for line in lines:
+            id, img_base64 = line.strip().split("/t")
+            self.imgDict[id] = img_base64
+            
+    def get_image(self, image_id):
+        
+        img_base64 = self.imgDict[image_id]  
+        image = Image.open(BytesIO(base64.b64decode(img_base64))) 
+        return image     
+        
     def get_all_images(self):
         """
         {'title': '',
