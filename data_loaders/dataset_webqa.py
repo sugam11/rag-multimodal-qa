@@ -44,7 +44,7 @@ class WebQAKnowledgeBase:
             lines = fp.readlines()
             
         for line in lines:
-            img_id, img_base64 = line.strip().split("/t")
+            img_id, img_base64 = tuple(line.strip().split("\t"))
             self.imgDict[img_id] = img_base64
             
     def get_image(self, image_id):
