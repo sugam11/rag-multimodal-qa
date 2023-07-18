@@ -45,18 +45,15 @@ class NumpySearch(VectorDB):
             )
 
         for text in data.get_all_texts():
-            embed = self.embedder.get_embedding(text["text"])
+            embed = self.embedder.get_text_embedding(text["text"])
             self.vectors.append(embed)
             text["type"] = "text"
             self.meta_data[self.idx] = text
             self.idx += 1
         for img in data.get_all_images():
-            if data_set == 'WebQA':
-                image_id = img['id']
-                image = data.get_image(image_id)
-                embed = self.embedder.get_embedding(image)
-            else:
-                embed = self.embedder.get_embedding(img["path"])
+            image_id = img["id"] if data_set == "WebQA" else img["path"]
+            image = data.get_image(image_id)
+            embed = self.embedder.get_img_embedding(image)
             self.vectors.append(embed)
             img["type"] = "img"
             self.meta_data[self.idx] = img
