@@ -35,7 +35,8 @@ class NumpySearch(VectorDB):
 
         if data_set == "WebQA":
             data = WebQAKnowledgeBase(
-                "/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json"
+                "/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json",
+                "/data/users/sgarg6/capstone/webqa/data/imgs.tsv"   
             )
         else:
             data = MMQAKnowledgeBase(
@@ -50,7 +51,12 @@ class NumpySearch(VectorDB):
             self.meta_data[self.idx] = text
             self.idx += 1
         for img in data.get_all_images():
-            embed = self.embedder.get_embedding(img["path"])
+            if data_set == 'WebQA':
+                image_id = img['id']
+                image = data.get_image(image_id)
+                embed = self.embedder.get_embedding(image)
+            else:
+                embed = self.embedder.get_embedding(img["path"])
             self.vectors.append(embed)
             img["type"] = "img"
             self.meta_data[self.idx] = img
