@@ -15,16 +15,18 @@ class NumpySearch(VectorDB):
         self.meta_data = {}
         self.vectors = []
         self.idx = 0
+        self.store_path = os.path.join(STORE, embedder.get_name())
         if os.path.exists(STORE):
-            if os.path.exists(os.path.join(STORE, f"vectors_{data_set}.npy")):
-                self.vectors = np.load(os.path.join(STORE, f"vectors_{data_set}.npy"))
-                print(f"loaded {self.vectors.shape[0]} vectors")
-            if os.path.exists(os.path.join(STORE, f"meta_data_{data_set}.pkl")):
-                with open(
-                    os.path.join(STORE, f"meta_data_{data_set}.pkl"), "rb"
-                ) as handle:
-                    self.meta_data = pickle.load(handle)
-                    print("Loaded meta data from pickle file")
+            if os.path.exists(self.store_path):
+                if os.path.exists(os.path.join(self.store_path, f"vectors_{data_set}.npy")):
+                    self.vectors = np.load(os.path.join(self.store_path, f"vectors_{data_set}.npy"))
+                    print(f"loaded {self.vectors.shape[0]} vectors")
+                if os.path.exists(os.path.join(self.store_path, f"meta_data_{data_set}.pkl")):
+                    with open(
+                        os.path.join(self.store_path, f"meta_data_{data_set}.pkl"), "rb"
+                    ) as handle:
+                        self.meta_data = pickle.load(handle)
+                        print("Loaded meta data from pickle file")
 
         if len(self.meta_data.keys()) == 0 or len(self.vectors) == 0:
             self.process_documents(data_set)
@@ -32,7 +34,7 @@ class NumpySearch(VectorDB):
     def process_documents(self, data_set):
         self.meta_data = {}
         self.vectors = []
-
+        print(f"Computing Embeddings for: {data_set}")
         if data_set == "WebQA":
             data = WebQAKnowledgeBase(
                 "/data/users/sgarg6/capstone/webqa/data/WebQA_train_val.json",
@@ -43,13 +45,14 @@ class NumpySearch(VectorDB):
                 "/data/users/sgarg6/capstone/multimodalqa/MMQA_texts.jsonl",
                 "/data/users/sgarg6/capstone/multimodalqa/MMQA_images.jsonl",
             )
-
+        print(f"Computing text embeddings")
         for text in data.get_all_texts():
             embed = self.embedder.get_text_embedding(text["text"])
             self.vectors.append(embed)
             text["type"] = "text"
             self.meta_data[self.idx] = text
             self.idx += 1
+        print(f"Computing image embeddings")
         for img in data.get_all_images():
             image_id = img["id"] if data_set == "WebQA" else img["path"]
             image = data.get_image(image_id)
@@ -59,14 +62,17 @@ class NumpySearch(VectorDB):
             self.meta_data[self.idx] = img
             self.idx += 1
         self.vectors = np.stack(self.vectors)
+        print(f"Storing embeddings")
         if not os.path.exists(STORE):
             os.mkdir(STORE)
-        np.save(os.path.join(STORE, f"vectors_{data_set}.npy"), self.vectors)
-        with open(os.path.join(STORE, f"meta_data_{data_set}.pkl"), "wb") as handle:
+        if not os.path.exists(self.store_path):
+            os.mkdir(self.store_path)
+        np.save(os.path.join(self.store_path, f"vectors_{data_set}.npy"), self.vectors)
+        with open(os.path.join(self.store_path, f"meta_data_{data_set}.pkl"), "wb") as handle:
             pickle.dump(self.meta_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     def retrieve(self, text, result_type="hybrid", k=5):
-        embed = self.embedder.get_embedding(text)
+        embed = self.embedder.get_text_embedding(text)
         distance_matrix = cosine_similarity(embed.reshape(1, -1), self.vectors)
         distances = distance_matrix[0]
         top_k_idx = np.argsort(distances)
