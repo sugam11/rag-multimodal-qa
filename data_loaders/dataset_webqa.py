@@ -62,11 +62,17 @@ class WebQAKnowledgeBase:
          'path': ''}
         """
 
-        img = []
-        for k, v in self.train:
-            img += v["img_posFacts"] + v["img_negFacts"]
+        img_list = []
+        img_id = set()
+        for point in self.train:
+            imgs, img_ids = self.get_unique_from_list(img_id, point["img_posFacts"], "image_id")
+            img_list += imgs
+            img_id.update(img_ids)
+            imgs, img_ids = self.get_unique_from_list(img_id, point["img_negFacts"], "image_id") 
+            img_list += imgs
+            img_id.update(img_ids)
 
-        for image in img:
+        for image in img_list:
             yield (
                 {
                     "title": image["title"],
@@ -76,6 +82,15 @@ class WebQAKnowledgeBase:
                     "path": image["imageUrl"],
                 }
             )
+    
+    def get_unique_from_list(self, set_id, list_dic, item_key):
+        out = []
+        unique_ids = set()
+        for item in list_dic:
+            if item[item_key] not in set_id:
+                unique_ids.add(item[item_key])
+                out.append(item)
+        return out, set_id
 
     def get_all_texts(self):
         """
@@ -84,11 +99,17 @@ class WebQAKnowledgeBase:
          'id': '',
          'text': ''}
         """
-        txt = []
-        for k, v in self.train:
-            txt += v["txt_posFacts"] + v["txt_negFacts"]
+        text_list = []
+        text_id = set()
+        for point in self.train:
+            texts, text_ids = self.get_unique_from_list(text_id, point["txt_posFacts"], "snippet_id")
+            text_list += texts
+            text_id.update(text_ids)
+            texts, text_ids = self.get_unique_from_list(text_id, point["txt_negFacts"], "snippet_id") 
+            text_list += texts
+            text_id.update(text_ids)
 
-        for text in txt:
+        for text in text_list:
             yield (
                 {
                     "title": text["title"],
