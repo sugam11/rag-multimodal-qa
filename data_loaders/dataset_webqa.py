@@ -79,7 +79,7 @@ class WebQAKnowledgeBase:
                     "caption": image["caption"],
                     "url": image["url"],
                     "id": image["image_id"],
-                    "path": image["imageUrl"],
+                    "path": image["imgUrl"],
                 }
             )
     
