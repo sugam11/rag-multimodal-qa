@@ -45,7 +45,7 @@ class WebQAKnowledgeBase:
             
         for line in lines:
             img_id, img_base64 = tuple(line.strip().split("\t"))
-            self.imgDict[img_id] = img_base64
+            self.imgDict[int(img_id)] = img_base64
             
     def get_image(self, image_id):
         
@@ -71,7 +71,7 @@ class WebQAKnowledgeBase:
             imgs, img_ids = self.get_unique_from_list(img_id, point["img_negFacts"], "image_id") 
             img_list += imgs
             img_id.update(img_ids)
-
+        print(f"Fetching {len(img_list)} images")
         for image in img_list:
             yield (
                 {
@@ -108,7 +108,7 @@ class WebQAKnowledgeBase:
             texts, text_ids = self.get_unique_from_list(text_id, point["txt_negFacts"], "snippet_id") 
             text_list += texts
             text_id.update(text_ids)
-
+        print(f"Fetching {len(text_list)} passages")
         for text in text_list:
             yield (
                 {
