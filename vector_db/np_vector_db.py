@@ -5,6 +5,7 @@ from data_loaders.dataset_mmqa import MMQAKnowledgeBase
 from data_loaders.dataset_webqa import WebQAKnowledgeBase
 from sklearn.metrics.pairwise import cosine_similarity
 from vector_db.vector_db import VectorDB
+from tqdm import tqdm 
 
 STORE = "db/"
 
@@ -44,23 +45,28 @@ class NumpySearch(VectorDB):
             data = MMQAKnowledgeBase(
                 "/data/users/sgarg6/capstone/multimodalqa/MMQA_texts.jsonl",
                 "/data/users/sgarg6/capstone/multimodalqa/MMQA_images.jsonl",
+                "/data/users/sgarg6/capstone/multimodalqa/final_dataset_images"
             )
         print(f"Computing text embeddings")
-        for text in data.get_all_texts():
+        for text in tqdm(data.get_all_texts()):
             embed = self.embedder.get_text_embedding(text["text"])
             self.vectors.append(embed)
             text["type"] = "text"
             self.meta_data[self.idx] = text
             self.idx += 1
         print(f"Computing image embeddings")
-        for img in data.get_all_images():
+        for img in tqdm(data.get_all_images()):
             image_id = img["id"] if data_set == "WebQA" else img["path"]
-            image = data.get_image(image_id)
-            embed = self.embedder.get_img_embedding(image)
-            self.vectors.append(embed)
-            img["type"] = "img"
-            self.meta_data[self.idx] = img
-            self.idx += 1
+            try:
+                image = data.get_image(image_id)
+                embed = self.embedder.get_img_embedding(image)
+                self.vectors.append(embed)
+                img["type"] = "img"
+                self.meta_data[self.idx] = img
+                self.idx += 1
+            except Exception as e:
+                print(e)
+                print(img)
         self.vectors = np.stack(self.vectors)
         print(f"Storing embeddings")
         if not os.path.exists(STORE):
