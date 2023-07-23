@@ -94,7 +94,7 @@ class NumpySearch(VectorDB):
         else:
             top_k_docs = [
                 self.meta_data[idx]
-                for idx in top_k_idx[-2 * k:]
+                for idx in top_k_idx[-100 * k:]
                 if self.meta_data[idx]["type"] == "img"
             ][:k]
 
