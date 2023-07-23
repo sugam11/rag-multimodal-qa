@@ -77,7 +77,7 @@ class MMQAKnowledgeBase:
         for img in self.img_kb:
             yield img
     
-    def get_img(self, img_path):
+    def get_image(self, img_path):
         abs_img_path = os.path.join(self.img_store, img_path)
         return Image.open(abs_img_path)
     

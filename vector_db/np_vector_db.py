@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from vector_db.vector_db import VectorDB
 from tqdm import tqdm 
 
-STORE = "db/"
+STORE = "/data/users/sgarg6/capstone/db/"
 
 
 class NumpySearch(VectorDB):
