@@ -31,6 +31,7 @@ class NumpySearch(VectorDB):
 
         if len(self.meta_data.keys()) == 0 or len(self.vectors) == 0:
             self.process_documents(data_set)
+        self.vectors = self.vectors.reshape(-1, 512)
 
     def process_documents(self, data_set):
         self.meta_data = {}
@@ -83,17 +84,17 @@ class NumpySearch(VectorDB):
         distances = distance_matrix[0]
         top_k_idx = np.argsort(distances)
         if result_type == "hybrid":
-            top_k_docs = [self.meta_data[idx] for idx in top_k_idx[:k]]
+            top_k_docs = [self.meta_data[idx] for idx in top_k_idx[-k:]]
         elif result_type == "text":
             top_k_docs = [
                 self.meta_data[idx]
-                for idx in top_k_idx[: 2 * k]
+                for idx in top_k_idx[-2 * k:]
                 if self.meta_data[idx]["type"] == "text"
             ][:k]
         else:
             top_k_docs = [
                 self.meta_data[idx]
-                for idx in top_k_idx[: 2 * k]
+                for idx in top_k_idx[-2 * k:]
                 if self.meta_data[idx]["type"] == "img"
             ][:k]
 
