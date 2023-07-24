@@ -11,7 +11,6 @@ class RedpajamaModel:
         self.model = self.model.to(device)
 
     def generate_answer(self, beams, imgs, prompt):
-        print(prompt)
         inputs = self.tokenizer(prompt, return_tensors='pt').to(self.model.device)
         input_length = inputs.input_ids.shape[1]
         outputs = self.model.generate(
