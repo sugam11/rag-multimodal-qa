@@ -16,7 +16,10 @@ class FlamingoModel:
             cross_attn_every_n_layers=n_layers,
         )
         self.args = [lang_encoder, tokenizer, n_layers]
+        checkpoint_path = hf_hub_download("openflamingo/OpenFlamingo-4B-vitl-rpj3b-langinstruct", "checkpoint.pt")
+        self.model.load_state_dict(torch.load(checkpoint_path), strict=False)
         self.model = self.model.to(device)
+
 
     """
     Preprocessing images
@@ -65,7 +68,12 @@ class FlamingoModel:
             vision_x=vision_x,
             lang_x=lang_x["input_ids"],
             attention_mask=lang_x["attention_mask"],
-            max_new_tokens=20,
+            max_new_tokens=40,
+            early_stopping=True,
+            top_k=0,
+            temperature=0.75,
+            num_return_sequences=1,
+            top_p=0.9,
             num_beams=num_beams,
         )
         answer = self.tokenizer.decode(generated_text[0])
