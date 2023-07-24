@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset
 from data_loaders import data_utils
-
+from PIL import Image
+import os
 
 class MMQAQuestionAnswer:
     def __init__(self, train_file, val_file):
@@ -57,11 +58,12 @@ class MMQAKnowledgeBase:
 
     """
 
-    def __init__(self, text_kb_path, img_kb_path):
+    def __init__(self, text_kb_path, img_kb_path, img_store):
         self.text_kb = data_utils.load_jsonl_file(text_kb_path)
         print(f"Loaded {len(self.text_kb)} text passages")
         self.img_kb = data_utils.load_jsonl_file(img_kb_path)
         print(f"Loaded {len(self.img_kb)} image sources")
+        self.img_store = img_store
 
     def get_all_images(self):
         """
@@ -74,7 +76,11 @@ class MMQAKnowledgeBase:
         """
         for img in self.img_kb:
             yield img
-
+    
+    def get_image(self, img_path):
+        abs_img_path = os.path.join(self.img_store, img_path)
+        return Image.open(abs_img_path)
+    
     def get_all_texts(self):
         """
         Returns meta data of images in format:
@@ -84,4 +90,4 @@ class MMQAKnowledgeBase:
          'text': ''}
         """
         for text in self.text_kb:
-            return text
+            yield text
