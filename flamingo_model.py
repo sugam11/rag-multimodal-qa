@@ -65,7 +65,12 @@ class FlamingoModel:
             vision_x=vision_x,
             lang_x=lang_x["input_ids"],
             attention_mask=lang_x["attention_mask"],
-            max_new_tokens=20,
+            max_new_tokens=40,
+            early_stopping=True,
+            top_k=0,
+            temperature=0.75,
+            num_return_sequences=1,
+            top_p=0.9,
             num_beams=num_beams,
         )
         answer = self.tokenizer.decode(generated_text[0])
