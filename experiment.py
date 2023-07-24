@@ -1,4 +1,5 @@
 import os
+import re
 import flamingo_model
 import redpajama_model#
 from data_loaders import qa_dataset
@@ -28,14 +29,14 @@ def run_experiment(model,f_prefix, run_on=["MMQA", "WebQA"]):
             "MMQA", "val"
         )
         data_loader = DataLoader(data)
-        generate_output_mmqa(3, model, data_loader, f_prefix)
+        generate_output_mmqa(10, model, data_loader, f_prefix)
 
     if "WebQA" in run_on:
         data = qa_dataset.get_dataset(
             "WebQA", "val"
         )
-        #data_loader = DataLoader(data)
-        #generate_output_webqa(3, model, data_loader)
+        data_loader = DataLoader(data)
+        generate_output_webqa(10, model, data_loader, f_prefix)
 
 
 def generate_output_mmqa(beams, baseline, data, f_prefix):
@@ -48,9 +49,11 @@ def generate_output_mmqa(beams, baseline, data, f_prefix):
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
-        question = "Q:" + ques + "A:"
+        question =  "<image> Answer the following question and only output the correct answer. \nQ: " + ques +" \nA: "
         ans = baseline.generate_answer(beams, [blank_image], question)
         ans = ''.join(ans.splitlines())
+        ans = re.sub('<image>[^>]+ A:', '', ans)
+        ans = re.sub('<[^>]+>', '', ans)
         answers[qid] = ans
         df['qid'].append(qid)
         df['Q'].append(ques)
@@ -65,7 +68,7 @@ def generate_output_mmqa(beams, baseline, data, f_prefix):
         json.dump(answers, outfile)
      
 
-def generate_output_webqa(beams, baseline, data):
+def generate_output_webqa(beams, baseline, data, f_prefix):
     blank_image = Image.open("resources/1x1_#00000000.png")
     df = {'qid':[],
                'Qcate':[],
@@ -78,9 +81,11 @@ def generate_output_webqa(beams, baseline, data):
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
-        question = "Q:" + ques + "A:"
+        question =  "Answer the following question and only output the correct answer. \nQ: " + ques +" \nA: "
         ans = baseline.generate_answer(beams, [blank_image], question)
         ans = ''.join(ans.splitlines())
+        ans = re.sub('<image>[^>]+ A:', '', ans)
+        ans = re.sub('<[^>]+>', '', ans)
         df['qid'].append(qid)
         df['Qcate'].append(x[3][0])
         df['Q'].append(ques)
@@ -90,15 +95,16 @@ def generate_output_webqa(beams, baseline, data):
         df['Output'].append(ans)
 
     df = pd.DataFrame(df)
-    df.to_csv("webqa_base_dev.tsv", header=['Guid','Qcate','Q','A','Keywords_A','Output_conf','Output'])
+    path = f_prefix + "_webqa_base_dev.tsv"
+    df.to_csv(path, header=['Guid','Qcate','Q','A','Keywords_A','Output_conf','Output'])
 
 
 if __name__ == "__main__":
-    model = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
+    model = flamingo_model.FlamingoModel("togethercomputer/RedPajama-INCITE-Instruct-3B-v1", "togethercomputer/RedPajama-INCITE-Instruct-3B-v1", 1)
     if type(opts.data_set) == "str":
         opts.data_set = [opts.data_set]
     print(f"Running Experiment on {opts.data_set}")
     run_experiment(model,"openf", opts.data_set)
-    #model = redpajama_model.RedpajamaModel()
-    #run_experiment(model,"redpj", opts.data_set)
+    model = redpajama_model.RedpajamaModel()
+    run_experiment(model,"redpj", opts.data_set)
 
