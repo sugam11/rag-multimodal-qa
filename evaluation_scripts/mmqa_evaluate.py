@@ -8,9 +8,15 @@ from typing import List, Set, Tuple, Union
 from scipy.optimize import linear_sum_assignment
 from word2number.w2n import word_to_num
 from common_utils import *
+from sentence_transformers import SentenceTransformer, util
+from rouge import Rouge
+from nltk.tokenize import word_tokenize
+from nltk.translate import meteor_score
 
 # From here through _match_numbers_if_present was originally copied from the evaluation code of DROP dataset:
 # https://github.com/allenai/allennlp-reading-comprehension/blob/master/allennlp_rc/eval/drop_eval.py
+sentence_transformer_model = SentenceTransformer('all-MiniLM-L6-v2')
+rouge_model = Rouge()
 
 def _remove_articles(text: str) -> str:
     regex = re.compile(r"\b(a|an|the)\b", re.UNICODE)
@@ -161,6 +167,28 @@ def list_f1(predicted, gold):
     f1 = round(f1, 2)
     return f1
 
+def list_sbert_similarity(predicted, gold):
+    embeddings1 = sentence_transformer_model.encode(predicted, convert_to_tensor=True)
+    embeddings2 = sentence_transformer_model.encode(gold[0], convert_to_tensor=True)
+    sbert_score = util.pytorch_cos_sim(embeddings1, embeddings2).item()
+    return sbert_score
+
+def list_rouge(predicted, gold): 
+    try:
+        rouge_scores = rouge_model.get_scores(predicted, gold[0])
+        rouge_l_score = rouge_scores[0]['rouge-l']['f']
+        return rouge_l_score
+    except ValueError as e:
+        print(e)
+        print(predicted)
+        print(gold)
+        return 0
+
+def list_meteor(predicted, gold):
+    tokenized_current_step_prompt = word_tokenize(predicted)
+    tokenized_gt_out = word_tokenize(gold[0])
+    meteor_score_value = meteor_score.single_meteor_score(tokenized_current_step_prompt, tokenized_gt_out)
+    return meteor_score_value
 
 def metric_max_over_ground_truths(metric_fn, prediction, gold_answers):
     scores_for_ground_truths = []
@@ -177,7 +205,10 @@ def evaluate_predictions(predictions, gold_answers, example_types=None):
     instance_eval_results_by_types = {}
     eval_funcs = {
         "list_em": list_em,
-        "list_f1": list_f1
+        "list_f1": list_f1,
+        "list_sbert_similarity": list_sbert_similarity, 
+        "list_rouge": list_rouge,
+        "list_meteor": list_meteor
     }
     for qas_id in gold_answers:
         ref_answers = gold_answers[qas_id]
@@ -252,17 +283,17 @@ def evaluate_prediction_file(prediction_path, gold_path):
 
     hop_type_counts = Counter(hop_types.values())
     _, _, eval_scores_by_hop_types = evaluate_predictions(predicted_answers, gold_answers, hop_types)
-    print("\n\nType\tCount\tEM\tF1")
+    print("\n\nType\tCount\tEM\tF1\tSbertSim\tRouge\tMeteor")
     for hop_type in sorted(eval_scores_by_hop_types.keys()):
         result = eval_scores_by_hop_types[hop_type]
-        print(f"{hop_type}\t{hop_type_counts[hop_type]}\t{result['list_em']}\t{result['list_f1']}")
+        print(f"{hop_type}\t{hop_type_counts[hop_type]}\t{result['list_em']}\t{result['list_f1']}\t{result['list_sbert_similarity']}\t{result['list_rouge']}\t{result['list_meteor']}")
 
     question_type_counts = Counter(question_types.values())
     _, _, eval_scores_by_qtypes = evaluate_predictions(predicted_answers, gold_answers, question_types)
-    print("\n\nType\tCount\tEM\tF1")
+    print("\n\nType\tCount\tEM\tF1\tSbertSim\tRouge\tMeteor")
     for question_type in sorted(eval_scores_by_qtypes.keys()):
         result = eval_scores_by_qtypes[question_type]
-        print(f"{question_type}\t{question_type_counts[question_type]}\t{result['list_em']}\t{result['list_f1']}")
+        print(f"{question_type}\t{question_type_counts[question_type]}\t{result['list_em']}\t{result['list_f1']}\t{result['list_sbert_similarity']}\t{result['list_rouge']}\t{result['list_meteor']}")
     return eval_scores
 
 
