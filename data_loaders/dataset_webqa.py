@@ -33,7 +33,7 @@ class WebQAQuestionAnswerPairs(Dataset):
 
     def __getitem__(self, index):
         sample = self.data[index]
-        return sample["Q"], sample["Guid"], sample["A"]
+        return sample["Q"], sample["Guid"], sample["A"], sample['Qcate'], sample['Keywords_A']
 
 
 class WebQAKnowledgeBase:

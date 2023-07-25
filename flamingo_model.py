@@ -16,7 +16,10 @@ class FlamingoModel:
             cross_attn_every_n_layers=n_layers,
         )
         self.args = [lang_encoder, tokenizer, n_layers]
+        checkpoint_path = hf_hub_download("openflamingo/OpenFlamingo-4B-vitl-rpj3b-langinstruct", "checkpoint.pt")
+        self.model.load_state_dict(torch.load(checkpoint_path), strict=False)
         self.model = self.model.to(device)
+
 
     """
     Preprocessing images
