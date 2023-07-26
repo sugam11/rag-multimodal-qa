@@ -1,5 +1,5 @@
-,Guid,Qcate,Q,A,Keywords_A,Output_conf,Output
-0,d5bbc7c80dba11ecb1e81171463288e9,YesNo,"""Does a Minnetonka Rhododendron flower have petals in a cup shape?""","('""No, a Minnetonka Rhododendron flower does not have petals in a cup shape.""',)",TBD,1, 	No.
+#,Guid,Qcate,Q,A,Keywords_A,Output_conf,Output
+0,d5bbc7c80dba11ecb1e81171463288e9,Qcate:YesNo,"""Does a Minnetonka Rhododendron flower have petals in a cup shape?""","('""No, a Minnetonka Rhododendron flower does not have petals in a cup shape.""',)",TBD,1, 	No.
 1,d5bbc8720dba11ecb1e81171463288e9,Others,"""What water-related object is sitting in front of the Torre del Reloj?""","('""A fountain is sitting in front of the Torre del Reloj.""',)",TBD,1, 	The water-related object is sitting in front of the Torre del Reloj.
 2,d5bbca160dba11ecb1e81171463288e9,shape,"""What shapes are painted down the center of Salou Boulevard?""","('""Blue footprints are painted down the center of Salou Boulevard.""',)",TBD,1, 	The shapes are painted down the center of Salou Boulevard.
 3,d5bbd6640dba11ecb1e81171463288e9,YesNo,"""Are there sidewalks on both sides of the Mid-Hudson Bridge?""","('""Yes, there are sidewalks on both sides of the Mid-Hudson Bridge.""',)",TBD,1, 	Yes.
@@ -2631,7 +2631,8 @@
 2629,d5d010d40dba11ecb1e81171463288e9,text,Were Estelle Harrison and Shuler Paul Hensley the only children in their families or did they have siblings?,"('They both had siblings.',)",TBD,1, 	They were the only children in their families.
 2630,d5d011240dba11ecb1e81171463288e9,text,Does Body psychotherapy or Somatic psychotherapy seem to have a more in-depth approach of the human body?,"('Somatic psychotherapy',)",TBD,1, 	Body psychotherapy or Somatic psychotherapy seems to have a more in-depth approach of the human body.
 2631,d5d012be0dba11ecb1e81171463288e9,text,Did Cher's rock version or Cliff Richard's cover version of Bang Bang get released first?,"(""Cliff Richard's cover"",)",TBD,1, 	Bang Bang was released first.
-2632,d5d017e60dba11ecb1e81171463288e9,text,What was the occupation of Swedish Louis Gerhard De Geer prior to becoming Prime Minister for Justice?,"('He was lord justice for the appellate court of Götaland.',)",TBD,1, 	Lawyer.
+2632,d5d017e60dba11ecb1e81171463288e9,text,What was the occupation of 
+Swedish Louis Gerhard De Geer prior to becoming Prime Minister for Justice?,"('He was lord justice for the appellate court of Götaland.',)",TBD,1, 	Lawyer.
 2633,d5d01a660dba11ecb1e81171463288e9,text,What two religious buildings are national monuments in the towns of La Rochelle and Meaux in France?,"('The Meaux Cathedral and La Rochelle Cathedral are national monuments in these towns.',)",TBD,1, 	La Rochelle Cathedral and Meaux Cathedral.
 2634,d5d01aac0dba11ecb1e81171463288e9,text,"What part of the body has 800 to 1,000 minor salivary glands located throughout it and has a side of a tooth adjacent to it?","('The oral cavity.',)",TBD,1, 	Mouth.
 2635,d5d01f3e0dba11ecb1e81171463288e9,text,Did Léon Gambetta get to operate a French cruiser during WWI in France?,"(""He couldn't because he died 32 years before WWI started."",)",TBD,1, 	No.

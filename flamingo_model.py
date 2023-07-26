@@ -72,7 +72,7 @@ class FlamingoModel:
             early_stopping=True,
             top_k=0,
             temperature=0.75,
-            num_return_sequences=1,
+            num_return_sequences=8,
             top_p=0.9,
             num_beams=num_beams,
         )
