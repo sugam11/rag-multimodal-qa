@@ -3,11 +3,9 @@ from torch.utils.data import Dataset, DataLoader
 from huggingface_hub import hf_hub_download
 import torch
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 class FlamingoModel:
-    def __init__(self, lang_encoder, tokenizer, n_layers):
+    def __init__(self, lang_encoder, tokenizer, n_layers, device=None):
         self.model, self.image_processor, self.tokenizer = create_model_and_transforms(
             clip_vision_encoder_path="ViT-L-14",
             clip_vision_encoder_pretrained="openai",
@@ -15,10 +13,14 @@ class FlamingoModel:
             tokenizer_path=tokenizer,
             cross_attn_every_n_layers=n_layers,
         )
+        if device is None: 
+            self.device = torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
+        else: 
+            self.device = device
         self.args = [lang_encoder, tokenizer, n_layers]
         checkpoint_path = hf_hub_download("openflamingo/OpenFlamingo-4B-vitl-rpj3b-langinstruct", "checkpoint.pt")
         self.model.load_state_dict(torch.load(checkpoint_path), strict=False)
-        self.model = self.model.to(device)
+        self.model = self.model.to(self.device)
 
 
     """
@@ -33,7 +35,7 @@ class FlamingoModel:
         vision_x = [self.image_processor(x).unsqueeze(0) for x in imgs]
         vision_x = torch.cat(vision_x, dim=0)
         vision_x = vision_x.unsqueeze(1).unsqueeze(0)
-        return vision_x.to(device)
+        return vision_x.to(self.device)
 
     """
     Preprocessing text
@@ -50,7 +52,7 @@ class FlamingoModel:
             [txt],
             return_tensors="pt",
         )
-        return lang_x.to(device)
+        return lang_x.to(self.device)
 
     """
     Generate Answer
