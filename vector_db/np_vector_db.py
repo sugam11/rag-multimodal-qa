@@ -82,19 +82,19 @@ class NumpySearch(VectorDB):
         embed = self.embedder.get_text_embedding(text)
         distance_matrix = cosine_similarity(embed.reshape(1, -1), self.vectors)
         distances = distance_matrix[0]
-        top_k_idx = np.argsort(distances)
+        top_k_idx = np.argsort(distances)[::-1]
         if result_type == "hybrid":
-            top_k_docs = [self.meta_data[idx] for idx in top_k_idx[-k:]]
+            top_k_docs = [self.meta_data[idx] for idx in top_k_idx[:k]]
         elif result_type == "text":
             top_k_docs = [
                 self.meta_data[idx]
-                for idx in top_k_idx[-2 * k:]
+                for idx in top_k_idx[:2*k]
                 if self.meta_data[idx]["type"] == "text"
             ][:k]
         else:
             top_k_docs = [
                 self.meta_data[idx]
-                for idx in top_k_idx[-100 * k:]
+                for idx in top_k_idx[:100 * k]
                 if self.meta_data[idx]["type"] == "img"
             ][:k]
 
