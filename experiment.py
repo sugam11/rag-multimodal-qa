@@ -111,4 +111,5 @@ if __name__ == "__main__":
     #model = redpajama_model.RedpajamaModel()
     #run_experiment(model,"redpj", opts.data_set)
     model = llama_model.Llama()
+    run_experiment(model,"llama", opts.data_set)
 
