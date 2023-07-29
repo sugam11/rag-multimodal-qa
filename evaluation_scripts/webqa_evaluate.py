@@ -91,8 +91,8 @@ def compute_vqa_metrics(cands, a, exclude="", domain=None):
             bow_c = list(domain.intersection(bow_c))
             bow_a = list(domain.intersection(bow_a))
         
-        #print(bow_c)
-        #print(bow_a)
+        print(bow_c)
+        print(bow_a)
         if bow_c == bow_a:
             EM = 1
         common = Counter(bow_a) & Counter(bow_c)
@@ -105,6 +105,7 @@ def compute_vqa_metrics(cands, a, exclude="", domain=None):
         PR.append(precision)
 
         f1 = 2*precision*recall / (precision + recall + 1e-5)
+        print(f1)
         F1.append(f1)
     
     PR_avg = np.mean(PR)
@@ -161,12 +162,16 @@ output_QC = []
 for r in tqdm(rows):
     
     datum = r.strip().split('\t')
+    print(datum)
     Qcate = datum[key['Qcate']]
     if (not 'all' in Qcate_breakdown) and (not Qcate in Qcate_breakdown): continue
     O = json.loads(datum[key['Output']])
+    print("O", O)
     C = [O[args.output_idx]]
-    Keywords_A = datum[key['Keywords_A']]
+    print("C",C)
+    Keywords_A = datum[key['A']]
     A = json.loads(datum[key['A']])
+    print("A", A)
     #normalizer = guid2norm[datum[key['Guid']]]
     normalizer = compute_bartscore_ParaBank(A, A)
     

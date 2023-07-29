@@ -43,7 +43,8 @@ class MMQAQuestionAnswerPairs(Dataset):
         point = self.data[idx]
         answers = [ans["answer"] for ans in point["answers"]]
         ques = point["question"]
-        return ques, point["qid"], answers
+        text_doc_ids = point["metadata"]["text_doc_ids"]
+        return ques, point["qid"], answers, text_doc_ids
 
 
 class MMQAKnowledgeBase:

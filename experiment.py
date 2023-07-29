@@ -1,7 +1,7 @@
 import os
 import re
 import flamingo_model
-import redpajama_model#
+import redpajama_model
 from data_loaders import qa_dataset
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
@@ -35,8 +35,8 @@ def run_experiment(model,f_prefix, run_on=["MMQA", "WebQA"]):
         data = qa_dataset.get_dataset(
             "WebQA", "val"
         )
-        data_loader = DataLoader(data)
-        generate_output_webqa(10, model, data_loader, f_prefix)
+        #data_loader = DataLoader(data)
+        #generate_output_webqa(10, model, data_loader, f_prefix)
 
 
 def generate_output_mmqa(beams, baseline, data, f_prefix):
@@ -49,11 +49,13 @@ def generate_output_mmqa(beams, baseline, data, f_prefix):
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
-        question =  "<image> Answer the following question and only output the correct answer. \nQ: " + ques +" \nA: "
+        question =  "Please answer the following question and output only the correct answer \nQ: " + ques +" \nA: "
         ans = baseline.generate_answer(beams, [blank_image], question)
         ans = ''.join(ans.splitlines())
         ans = re.sub('<image>[^>]+ A:', '', ans)
         ans = re.sub('<[^>]+>', '', ans)
+        #print(ques)
+        #print(ans)
         answers[qid] = ans
         df['qid'].append(qid)
         df['Q'].append(ques)
@@ -81,7 +83,7 @@ def generate_output_webqa(beams, baseline, data, f_prefix):
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
-        question =  "Answer the following question and only output the correct answer. \nQ: " + ques +" \nA: "
+        question =  "Answer the following question and output only the correct answer. \nQ: " + ques +" \nA: "
         ans = baseline.generate_answer(beams, [blank_image], question)
         ans = ''.join(ans.splitlines())
         ans = re.sub('<image>[^>]+ A:', '', ans)
@@ -96,7 +98,7 @@ def generate_output_webqa(beams, baseline, data, f_prefix):
 
     df = pd.DataFrame(df)
     path = f_prefix + "_webqa_base_dev.tsv"
-    df.to_csv(path, header=['Guid','Qcate','Q','A','Keywords_A','Output_conf','Output'])
+    df.to_csv(path, header=['Guid','Qcate','Q','A','Keywords_A','Output_conf','Output'], sep="\t")
 
 
 if __name__ == "__main__":

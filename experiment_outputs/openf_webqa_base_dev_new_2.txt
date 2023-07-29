@@ -1,0 +1,119 @@
+23-07-25 15:47:34
+
+Use Q categories: ['all']
+Use normalization = True
+#Eval_samples = 1
+
+ --------------------- metrics -----------------------
+
+--- Category = All: ---
+F1_avg = 0.9999950000249999
+EM = 1.0
+
+RE_avg = 1.0
+PR_avg = 1.0
+
+fluency_avg = 1.0
+acc_avg = 0.9999950000249999
+mul_avg = 0.9999950000249999
+
+
+--- Category = YesNo: ---
+F1_avg = 0.9999950000249999
+EM = 1.0
+
+RE_avg = 1.0
+PR_avg = 1.0
+
+fluency_avg = 1.0
+acc_avg = 0.9999950000249999
+mul_avg = 0.9999950000249999
+
+
+--- Category = choose: ---
+F1_avg = nan
+EM = nan
+
+RE_avg = nan
+PR_avg = nan
+
+fluency_avg = nan
+acc_avg = nan
+mul_avg = nan
+
+
+--- Category = color: ---
+F1_avg = nan
+EM = nan
+
+RE_avg = nan
+PR_avg = nan
+
+fluency_avg = nan
+acc_avg = nan
+mul_avg = nan
+
+
+--- Category = shape: ---
+F1_avg = nan
+EM = nan
+
+RE_avg = nan
+PR_avg = nan
+
+fluency_avg = nan
+acc_avg = nan
+mul_avg = nan
+
+
+--- Category = number: ---
+F1_avg = nan
+EM = nan
+
+RE_avg = nan
+PR_avg = nan
+
+fluency_avg = nan
+acc_avg = nan
+mul_avg = nan
+
+
+--- Category = Others: ---
+F1_avg = nan
+EM = nan
+
+RE_avg = nan
+PR_avg = nan
+
+fluency_avg = nan
+acc_avg = nan
+mul_avg = nan
+
+
+--- Category = text: ---
+F1_avg = nan
+EM = nan
+
+RE_avg = nan
+PR_avg = nan
+
+fluency_avg = nan
+acc_avg = nan
+mul_avg = nan
+
+-----Starting writing results:-----
+
+Guid === d5bbc7c80dba11ecb1e81171463288e9
+ Qcate === YesNo
+Q === Does a Minnetonka Rhododendron flower have petals in a cup shape?
+Keywords_A === ["No."]
+
+No.
+Normalizer === [0.2068]
+
+No.
+RE === 1.0
+F1 === 0.9999950000249999
+Fluency === 1
+Accuracy === 0.9999950000249999
+mul === 0.9999950000249999
