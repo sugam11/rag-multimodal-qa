@@ -2,6 +2,7 @@ import os
 import re
 import flamingo_model
 import redpajama_model
+import llama_model
 from data_loaders import qa_dataset
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
@@ -102,11 +103,12 @@ def generate_output_webqa(beams, baseline, data, f_prefix):
 
 
 if __name__ == "__main__":
-    model = flamingo_model.FlamingoModel("togethercomputer/RedPajama-INCITE-Instruct-3B-v1", "togethercomputer/RedPajama-INCITE-Instruct-3B-v1", 1)
+    #model = flamingo_model.FlamingoModel("togethercomputer/RedPajama-INCITE-Instruct-3B-v1", "togethercomputer/RedPajama-INCITE-Instruct-3B-v1", 1)
     if type(opts.data_set) == "str":
         opts.data_set = [opts.data_set]
     print(f"Running Experiment on {opts.data_set}")
-    run_experiment(model,"openf", opts.data_set)
-    model = redpajama_model.RedpajamaModel()
-    run_experiment(model,"redpj", opts.data_set)
+    #run_experiment(model,"openf", opts.data_set)
+    #model = redpajama_model.RedpajamaModel()
+    #run_experiment(model,"redpj", opts.data_set)
+    model = llama_model.Llama()
 
