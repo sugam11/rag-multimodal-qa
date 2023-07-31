@@ -45,11 +45,13 @@ def generate_output_mmqa(beams, baseline, data, f_prefix):
     answers = {}
     df = {'qid':[],
                'Q':[],
-               'A':[]
+               'A':[],
+               'Gold_A':[],
     }
     for x in tqdm(data, position=0, leave=True):
         ques = x[0][0]
         qid = x[1][0]
+        gold_ans = x[2][0]
         question =  "Please answer the following question and output only the correct answer \nQ: " + ques +" \nA: "
         ans = baseline.generate_answer(beams, [blank_image], question)
         ans = ''.join(ans.splitlines())
@@ -61,6 +63,7 @@ def generate_output_mmqa(beams, baseline, data, f_prefix):
         df['qid'].append(qid)
         df['Q'].append(ques)
         df['A'].append(ans)
+        df['Gold_A'].append(gold)
     
     df = pd.DataFrame(df)
     path = f_prefix + "_mmqa_base_dev.csv"
