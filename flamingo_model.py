@@ -13,13 +13,12 @@ class FlamingoModel:
             tokenizer_path=tokenizer,
             cross_attn_every_n_layers=n_layers,
         )
-        if device is None: 
-            self.device = torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
-        else: 
-            self.device = device
+        print(torch.cuda.is_available())
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print(self.device)
         self.args = [lang_encoder, tokenizer, n_layers]
-        checkpoint_path = hf_hub_download("openflamingo/OpenFlamingo-4B-vitl-rpj3b-langinstruct", "checkpoint.pt")
-        self.model.load_state_dict(torch.load(checkpoint_path), strict=False)
+        #checkpoint_path = hf_hub_download("openflamingo/OpenFlamingo-3B-vitl-mpt1b", "checkpoint.pt")
+        #self.model.load_state_dict(torch.load(checkpoint_path), strict=False)
         self.model = self.model.to(self.device)
 
 
@@ -34,7 +33,9 @@ class FlamingoModel:
     def process_imgs(self, imgs):
         vision_x = [self.image_processor(x).unsqueeze(0) for x in imgs]
         vision_x = torch.cat(vision_x, dim=0)
-        vision_x = vision_x.unsqueeze(1).unsqueeze(0)
+        #print(vision_x.shape)
+        vision_x = vision_x.unsqueeze(1)
+        #print(vision_x.shape)
         return vision_x.to(self.device)
 
     """
@@ -48,9 +49,13 @@ class FlamingoModel:
         self.tokenizer.padding_side = (
             "left"  # For generation padding tokens should be on the left
         )
+        if type(txt) == str:
+           txt = [txt]
         lang_x = self.tokenizer(
-            [txt],
+            txt,
             return_tensors="pt",
+            padding=True,
+            truncation=True
         )
         return lang_x.to(self.device)
 
@@ -64,19 +69,30 @@ class FlamingoModel:
     """
 
     def generate_answer(self, num_beams, imgs, txt):
-        vision_x = self.process_imgs(imgs)
-        lang_x = self.process_text(txt)
+        #vision_x = self.process_imgs(imgs)
+        #lang_x = self.process_text(txt)
+        vision_x = imgs
+        lang_x = txt
+        print("here")
+        print(txt)
+        print(vision_x)
         generated_text = self.model.generate(
             vision_x=vision_x,
             lang_x=lang_x["input_ids"],
             attention_mask=lang_x["attention_mask"],
-            max_new_tokens=40,
+            max_new_tokens=30,
             early_stopping=True,
             top_k=0,
             temperature=0.75,
-            num_return_sequences=8,
+            num_return_sequences=1,
             top_p=0.9,
             num_beams=num_beams,
         )
-        answer = self.tokenizer.decode(generated_text[0])
-        return answer
+        print("done")
+        answers = []
+        for x in generated_text:
+            ans = self.tokenizer.decode(x)
+            #print(ans)            
+            answers.append(ans)
+        #answer = self.tokenizer.decode(generated_text[0])
+        return answers
