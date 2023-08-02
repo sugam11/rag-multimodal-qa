@@ -2,7 +2,7 @@ from open_flamingo import create_model_and_transforms
 from torch.utils.data import Dataset, DataLoader
 from huggingface_hub import hf_hub_download
 import torch
-
+from accelerate import Accelerator
 
 class FlamingoModel:
     def __init__(self, lang_encoder, tokenizer, n_layers, device=None):
@@ -13,14 +13,15 @@ class FlamingoModel:
             tokenizer_path=tokenizer,
             cross_attn_every_n_layers=n_layers,
         )
-        print(torch.cuda.is_available())
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.accelerator = Accelerator()
+        self.device = self.accelerator.device
         print(self.device)
         self.args = [lang_encoder, tokenizer, n_layers]
         #checkpoint_path = hf_hub_download("openflamingo/OpenFlamingo-3B-vitl-mpt1b", "checkpoint.pt")
         #self.model.load_state_dict(torch.load(checkpoint_path), strict=False)
-        self.model = self.model.to(self.device)
-
+        self.model = self.accelerator.prepare(self.model)
+        self.is_main_process = self.accelerator.is_main_process
+        self.model = self.model.eval()
 
     """
     Preprocessing images
@@ -35,7 +36,6 @@ class FlamingoModel:
         vision_x = torch.cat(vision_x, dim=0)
         #print(vision_x.shape)
         vision_x = vision_x.unsqueeze(1)
-        #print(vision_x.shape)
         return vision_x.to(self.device)
 
     """
@@ -69,13 +69,8 @@ class FlamingoModel:
     """
 
     def generate_answer(self, num_beams, imgs, txt):
-        #vision_x = self.process_imgs(imgs)
-        #lang_x = self.process_text(txt)
         vision_x = imgs
         lang_x = txt
-        print("here")
-        print(txt)
-        print(vision_x)
         generated_text = self.model.generate(
             vision_x=vision_x,
             lang_x=lang_x["input_ids"],
@@ -88,11 +83,9 @@ class FlamingoModel:
             top_p=0.9,
             num_beams=num_beams,
         )
-        print("done")
         answers = []
         for x in generated_text:
             ans = self.tokenizer.decode(x)
-            #print(ans)            
             answers.append(ans)
         #answer = self.tokenizer.decode(generated_text[0])
         return answers

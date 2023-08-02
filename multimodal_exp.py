@@ -14,17 +14,17 @@ import torch
 data = qa_dataset.get_dataset(
             "MMQA", "val"
         )
-data_loader = DataLoader(data, batch_size=1)
 
-from embedder.clip import CLIPEmbedder
-device = "cuda" if torch.cuda.is_available() else "cpu"
+def collate_fn(x):
+    ques = [sample[0] for sample in x]
+    qids = [sample[1] for sample in x]
+    answers = [sample[2] for sample in x]
+    return ques, qids, answers
 
-
-db = dataset_mmqa.MMQAKnowledgeBase("/data/users/sgarg6/capstone/multimodalqa/MMQA_texts.jsonl", "/data/users/sgarg6/capstone/multimodalqa/MMQA_images.jsonl", "/data/users/sgarg6/capstone/multimodalqa/final_dataset_images")
-texts = db.get_all_texts()
+data_loader = DataLoader(data, batch_size = 8, collate_fn=collate_fn)
+#db = dataset_mmqa.MMQAKnowledgeBase("/data/users/sgarg6/capstone/multimodalqa/MMQA_texts.jsonl", "/data/users/sgarg6/capstone/multimodalqa/MMQA_images.jsonl", "/data/users/sgarg6/capstone/multimodalqa/final_dataset_images")
+#texts = db.get_all_texts()
 model = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
-#for x in texts:
-    #print(x)
 
 blank_image = Image.open("resources/1x1_#00000000.png")
 answers = {}
@@ -34,15 +34,12 @@ df = {'qid':[],
       #'Gold_A':[],
       #'docs':[]
 }
-ctr = 0
 for x in tqdm(data_loader, position=0, leave=True):
-    #print(x)
     ques = x[0]
     qids = x[1]
     #golds = x[2]
     #print(golds)
 
-    
     prompts = []
     imgs = []
     for i, q in enumerate(ques):
@@ -76,20 +73,14 @@ for x in tqdm(data_loader, position=0, leave=True):
         answers[qid] = ans
         df['qid'].append(qid)
         df['A'].append(ans)
-
         #df['Gold_A'].append(gold)
         #df['docs'].append(docs_retrieved)
-    #if ctr == 2:
-       #break
-    #ctr += 1
 
-#print(df)
+#df = pd.DataFrame(df)
+#path = "gold_mmqa_base_dev.csv"
+#df.to_csv(path)
 
-df = pd.DataFrame(df)
-path = "gold_mmqa_base_dev_2.csv"
-df.to_csv(path)
-
-path = "gold_mmqa_base_dev.json"
-with open(path, "w") as outfile:
-     json.dump(answers, outfile)
+#path = "gold_mmqa_base_dev.json"
+#with open(path, "w") as outfile:
+     #json.dump(answers, outfile)
 
