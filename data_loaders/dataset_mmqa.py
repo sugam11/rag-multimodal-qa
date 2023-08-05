@@ -43,12 +43,12 @@ class MMQAQuestionAnswerPairs(Dataset):
         point = self.data[idx]
         answers = [ans["answer"] for ans in point["answers"]]
         ques = point["question"]
-        text_doc_ids = []
+        doc_ids = []
         docs = point["supporting_context"]
         for doc in docs:
-               text_doc_ids.append(doc['doc_id'])
+               doc_ids.append(doc['doc_id'])
        
-        return ques, point["qid"], answers, text_doc_ids
+        return ques, point["qid"], answers, doc_ids
 
 
 class MMQAKnowledgeBase:
