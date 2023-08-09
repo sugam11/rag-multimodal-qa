@@ -2,7 +2,8 @@ from open_flamingo import create_model_and_transforms
 from torch.utils.data import Dataset, DataLoader
 from huggingface_hub import hf_hub_download
 import torch
-
+from accelerate import Accelerator
+from einops import repeat
 
 class FlamingoModel:
     def __init__(self, lang_encoder, tokenizer, n_layers, device=None):
@@ -13,15 +14,15 @@ class FlamingoModel:
             tokenizer_path=tokenizer,
             cross_attn_every_n_layers=n_layers,
         )
-        if device is None: 
-            self.device = torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
-        else: 
-            self.device = device
+        self.accelerator = Accelerator()
+        self.device = self.accelerator.device
+        print(self.device)
         self.args = [lang_encoder, tokenizer, n_layers]
         checkpoint_path = hf_hub_download("openflamingo/OpenFlamingo-4B-vitl-rpj3b-langinstruct", "checkpoint.pt")
         self.model.load_state_dict(torch.load(checkpoint_path), strict=False)
-        self.model = self.model.to(self.device)
-
+        self.model = self.accelerator.prepare(self.model)
+        self.is_main_process = self.accelerator.is_main_process
+        self.model.eval()
 
     """
     Preprocessing images
@@ -34,7 +35,7 @@ class FlamingoModel:
     def process_imgs(self, imgs):
         vision_x = [self.image_processor(x).unsqueeze(0) for x in imgs]
         vision_x = torch.cat(vision_x, dim=0)
-        vision_x = vision_x.unsqueeze(1).unsqueeze(0)
+        vision_x = repeat(vision_x, 'N c h w -> N F c h w', F=1)
         return vision_x.to(self.device)
 
     """
@@ -48,9 +49,13 @@ class FlamingoModel:
         self.tokenizer.padding_side = (
             "left"  # For generation padding tokens should be on the left
         )
+        if type(txt) == str:
+           txt = [txt]
         lang_x = self.tokenizer(
-            [txt],
+            txt,
             return_tensors="pt",
+            padding=True,
+            truncation=True
         )
         return lang_x.to(self.device)
 
@@ -64,19 +69,23 @@ class FlamingoModel:
     """
 
     def generate_answer(self, num_beams, imgs, txt):
-        vision_x = self.process_imgs(imgs)
-        lang_x = self.process_text(txt)
-        generated_text = self.model.generate(
-            vision_x=vision_x,
-            lang_x=lang_x["input_ids"],
-            attention_mask=lang_x["attention_mask"],
-            max_new_tokens=40,
-            early_stopping=True,
-            top_k=0,
-            temperature=0.75,
-            num_return_sequences=8,
-            top_p=0.9,
-            num_beams=num_beams,
-        )
-        answer = self.tokenizer.decode(generated_text[0])
-        return answer
+        vision_x = imgs
+        lang_x = txt
+        with torch.no_grad():
+             generated_text = self.model.generate(
+                  vision_x=vision_x,
+                  lang_x=lang_x["input_ids"],
+                  attention_mask=lang_x["attention_mask"],
+                  max_new_tokens=30,
+                  early_stopping=True,
+                  top_k=0,
+                  temperature=0.75,
+                  num_return_sequences=1,
+                  top_p=0.9,
+                  num_beams=num_beams,
+               )
+        answers = []
+        for x in generated_text:
+            ans = self.tokenizer.decode(x)
+            answers.append(ans)
+        return answers

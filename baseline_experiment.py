@@ -36,8 +36,8 @@ def run_experiment(model,f_prefix, run_on=["MMQA", "WebQA"]):
         data = qa_dataset.get_dataset(
             "WebQA", "val"
         )
-        #data_loader = DataLoader(data)
-        #generate_output_webqa(10, model, data_loader, f_prefix)
+        data_loader = DataLoader(data)
+        generate_output_webqa(10, model, data_loader, f_prefix)
 
 
 def generate_output_mmqa(beams, baseline, data, f_prefix):
@@ -106,13 +106,13 @@ def generate_output_webqa(beams, baseline, data, f_prefix):
 
 
 if __name__ == "__main__":
-    #model = flamingo_model.FlamingoModel("togethercomputer/RedPajama-INCITE-Instruct-3B-v1", "togethercomputer/RedPajama-INCITE-Instruct-3B-v1", 1)
+    model = flamingo_model.FlamingoModel("anas-awadalla/mpt-1b-redpajama-200b", "anas-awadalla/mpt-1b-redpajama-200b", 1)
     if type(opts.data_set) == "str":
         opts.data_set = [opts.data_set]
     print(f"Running Experiment on {opts.data_set}")
-    #run_experiment(model,"openf", opts.data_set)
-    #model = redpajama_model.RedpajamaModel()
-    #run_experiment(model,"redpj", opts.data_set)
-    model = llama_model.Llama()
-    run_experiment(model,"llama", opts.data_set)
+    run_experiment(model,"openf", opts.data_set)
+    model = redpajama_model.RedpajamaModel()
+    run_experiment(model,"redpj", opts.data_set)
+    #model = llama_model.Llama()
+    #run_experiment(model,"llama", opts.data_set)
 

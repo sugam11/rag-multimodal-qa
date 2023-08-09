@@ -27,48 +27,31 @@ db = dataset_mmqa.MMQAKnowledgeBase("/data/users/sgarg6/capstone/multimodalqa/MM
 model = flamingo_model.FlamingoModel("togethercomputer/RedPajama-INCITE-Instruct-3B-v1", "togethercomputer/RedPajama-INCITE-Instruct-3B-v1", 1)
 
 
+def write_results(df, answers):
+    df = pd.DataFrame(df)
+    path = "gold_mmqa_base_dev_both_test.csv"
+    df.to_csv(path)
+
+    #path = "gold_mmqa_base_dev_both.json"
+    #with open(path, "w") as outfile:
+         #json.dump(answers, outfile)
+
+
 def clean_output(output):
     output = re.sub('<image>[^>]+A:', '', output)
     output = re.sub('<[^>]+>', '', output)
-
     return output
 
 
-def prompt_builder(q, docs, db, gold):
-    doc_ids = []
-    for doc in docs:
-        doc_ids.append(doc)
-    texts = db.get_all_texts()
-    images = db.get_all_images()
-
-    text_docs = []
-    for text in texts:
-        if text['id'] in doc_ids:
-           text_docs.append(text['text'])
-
-    img_docs = []
-    for img in images:
-        if img['id'] in doc_ids:
-           img_docs.append(img["path"])
-             
+def prompt_builder(q, text_docs):             
     context = ""
     if text_docs:
        context = "".join([doc for doc in text_docs])  
-
-    if img_docs:
-        imgs = [db.get_image(img) for img in img_docs]
-        img_list.append(model.process_imgs(imgs))
-    else:
-        img_list.append(model.process_imgs([blank_image]))
-
-    df['Q'].append(q)
-    df['Gold_A'].append(gold)
-    df['docs'].append(doc_ids)
     prompt = "<image> Passage: " + context + "\nAnswer the following question and output only the answer. \nQ " + q + "\nA: " 
     return prompt
 
 
-def evaluate(data_loader,db, model, texts):
+def evaluate_ground_truth(data_loader, db, model):
     blank_image = Image.open("resources/1x1_#00000000.png")
     answers = {}
     df = {'qid':[],
@@ -88,7 +71,30 @@ def evaluate(data_loader,db, model, texts):
         for i, q in enumerate(ques):
              gold = golds[i]
              doc_ids = docs[i]
-             prompt = prompt_builder(q, doc_ids, db, gold)
+             df['Q'].append(q)
+             df['Gold_A'].append(gold)
+             df['docs'].append(doc_ids)
+
+             texts = db.get_all_texts()
+             images = db.get_all_images()
+
+             text_docs = []
+             for text in texts:
+                 if text['id'] in doc_ids:
+                    text_docs.append(text['text'])
+
+             img_docs = []
+             for img in images:
+                 if img['id'] in doc_ids:
+                    img_docs.append(img["path"])
+
+             if img_docs:
+                 imgs = [db.get_image(img) for img in img_docs]
+                 img_list.append(model.process_imgs(imgs))
+             else:
+                 img_list.append(model.process_imgs([blank_image]))
+
+             prompt = prompt_builder(q, text_docs)
              prompts.append(prompt)
 
         prompts = model.process_text(prompts)
@@ -100,13 +106,9 @@ def evaluate(data_loader,db, model, texts):
              answers[qid] = ans
              df['qid'].append(qid)
              df['A'].append(ans)
+        if ctr == 1:
+           break
+        ctr+=1
+    write_results(df, answers)
 
-    df = pd.DataFrame(df)
-    path = "gold_mmqa_base_dev_both.csv"
-    df.to_csv(path)
-
-    path = "gold_mmqa_base_dev_both.json"
-    with open(path, "w") as outfile:
-         json.dump(answers, outfile)
-
-evaluate(data_loader, db, model, texts)
+evaluate_ground_truth(data_loader, db, model)
