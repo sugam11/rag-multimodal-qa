@@ -210,15 +210,17 @@ def evaluate_predictions(predictions, gold_answers, example_types=None):
         "list_rouge": list_rouge,
         "list_meteor": list_meteor
     }
+    count = 0
     for qas_id in gold_answers:
         ref_answers = gold_answers[qas_id]
         if qas_id not in predictions:
-            print(f"Missing prediction for question {qas_id}, and all scores for this question are set to zero")
+            #print(f"Missing prediction for question {qas_id}, and all scores for this question are set to zero")
             instance_eval_results[qas_id] = {
                 metric: 0.0 for metric in eval_funcs.keys()
             }
         else:
             pred_answer = predictions[qas_id]
+            count += 1
             instance_eval_results[qas_id] = {
                 metric: metric_max_over_ground_truths(
                     func, pred_answer, ref_answers
@@ -229,7 +231,7 @@ def evaluate_predictions(predictions, gold_answers, example_types=None):
             if example_type not in instance_eval_results_by_types:
                 instance_eval_results_by_types[example_type] = {}
             instance_eval_results_by_types[example_type][qas_id] = instance_eval_results[qas_id]
-
+    print("Count: ", count)
     eval_scores = {metric: np.mean([result[metric] for result in instance_eval_results.values()]) * 100
                    for metric in eval_funcs.keys()}
 
