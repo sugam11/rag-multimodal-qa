@@ -17,8 +17,12 @@ class HybridEmbedder:
     def get_name (self,):
         return self.pretty_name
     
-    def get_text_embedding(self, text):
-        text_embeddings = self.text_embedder.encode(text, convert_to_tensor=True)
+    def get_text_embedding(self, text, emb_type="text"):
+        if emb_type == "text":
+            text_embeddings = self.text_embedder.encode(text, convert_to_tensor=True)
+        else:
+            inputs = self.image_tokenizer(text, return_tensors="pt", truncation=True).to(self.device)
+            text_embeddings = self.image_model.get_text_features(**inputs)
         embedding_as_np = text_embeddings.cpu().detach().numpy()
         return embedding_as_np
 
