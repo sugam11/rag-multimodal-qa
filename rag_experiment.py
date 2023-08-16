@@ -11,7 +11,7 @@ import re
 import pandas as pd
 import torch
 from embedder.clip import CLIPEmbedder
-
+from embedder.blip import BLIPEmbedder
 
 data = qa_dataset.get_dataset(
             "MMQA", "val"
@@ -37,26 +37,31 @@ mmqa_retriever = NumpySearch(clip, "MMQA")
 
 def write_results(df, answers):
     df = pd.DataFrame(df)
-    path = "gold_mmqa_base_dev_rag.csv"
+    path = "retrieval_image_text.csv"
     df.to_csv(path)
 
-    path = "gold_mmqa_base_rag.json"
+    path = "retrieval_image_text.json"
     with open(path, "w") as outfile:
          json.dump(answers, outfile)
 
 
 def clean_output(output):
-    output = re.sub('<image>[^>]+A:', '', output)
-    print(output)
+    output = output.split("Answer: ")[-1]
     output = re.sub('<[^>]+>', '', output)
     return output
-
 
 def prompt_builder(q, text_docs):             
     context = ""
     if text_docs:
-       context = "".join([doc for doc in text_docs])  
-    prompt = "<image> Passage: " + context + "\nAnswer the following question and output only the answer. \nQ " + q + "\nA: " 
+       doc_1 = text_docs[0]
+       doc_2 = text_docs[1] 
+       doc_3 = text_docs[2] 
+       doc_4 = text_docs[3]
+       doc_5 = text_docs[4]
+
+    #prompt = <image> Question: Which Player(s), in One Day Internationals of Sawai Mansingh Stadium, is holding a trophy that has a golden sphere inside of it? Answer: Sachin Tendulkar <|endofchunk|> 
+    prompt = "You are a helpful Question Answering assistant. You are being provided with a question along with an image and text documents to assist with answering the question. Use either the image or text document to answer the question. Follow the examples and answer the last question. <image> Text Document: " + doc_1 +  " Question: Which Title(s), in Filmography of Ben Piazza, has the left half of a woman's face on its poster? Answer: Tell Me That You Love Me, Junie Moon<|endofchunk|>" + " <image> Text Document: " + doc_2 +  " Question: What kind of horses race in the A.P. Warrior events with One and One-Quarter Miles? Answer: three-year-old Thoroughbreds<|endofchunk|>" + " <image> Text Document: " + doc_3 +  " Question: What color is Rachel Dratch wearing? Answer: black<|endofchunk|>" + " <image> Text Document: " + doc_4 +  " Question: who played mama on throw momma from the train Answer: Anne Ramsey<|endofchunk|>" + " <image> Text Document: " + doc_5 + " Question: " + q + " Answer: "
+    #print(prompt)   
     return prompt
 
 
@@ -115,10 +120,10 @@ def evaluate_ground_truth(data_loader, db, model):
              answers[qid] = ans
              df['qid'].append(qid)
              df['A'].append(ans)
-        if ctr == 1:
-           break
-        ctr+=1
-    write_results(df, answers)
+        #if ctr == 20:
+           #break
+        #ctr+=1
+    #write_results(df, answers)
 
 
 def evaluate_rag(data_loader, db, model, mmqa_retriever):
@@ -128,7 +133,6 @@ def evaluate_rag(data_loader, db, model, mmqa_retriever):
           'Q':[],
           'A':[],
           'Gold_A':[],
-          #'docs':[]
     }
     ctr = 0
     for x in tqdm(data_loader, position=0, leave=True):
@@ -137,23 +141,42 @@ def evaluate_rag(data_loader, db, model, mmqa_retriever):
         golds = x[2]
         prompts = []
         img_list = []
+        mmqa_text = [text for text in db.get_all_texts()]
+        mmqa_map = {text["id"]: text for text in mmqa_text}
+        mmqa_img = [img for img in db.get_all_images()]
+        mmqa_map_img = {img["id"]: img for img in mmqa_img}
+        sample_img_ids = ["ddf8b52a8400deaf05940c5cad8169cd", "117d500aaa630023c4038b8268b309c0", "971b2305045ca074690333bcf928d841", "cb19a093ca8ac601a8228c343e66e40c"]
+        sample_text_ids = ["7d567450c9e91b13727db7f9581a05ae", "cf7add03ba748689c02dd3bbdf7430c6", "46974e53316c95be39b43eeebcbc980d", "54ae8f9219afe262db5cce8d81b49463"]
         for i, q in enumerate(ques):
              gold = golds[i]
              df['Q'].append(q)
              df['Gold_A'].append(gold)
-             texts_retrieved = mmqa_retriever.retrieve(ques, "text")
+
+             txt_docs = []
+             for txt in sample_text_ids:
+                 txt_docs.append(mmqa_map[txt]['text'])
+
+             texts_retrieved = mmqa_retriever.retrieve(q, "text")
              text_docs = [doc["text"] for doc in texts_retrieved[:1]]
+             txt_docs.append(text_docs[0])
+
+             img_docs = []
+             for img in sample_img_ids:
+                 img_docs.append(mmqa_map_img[img]['path'])
+
              imgs_retrieved = mmqa_retriever.retrieve(ques, "image", k=5000)[:1]
-             img_docs = [doc["path"] for doc in imgs_retrieved]
+             for img in imgs_retrieved:
+                 img_docs.append(img['path'])
+
              if img_docs:
                  imgs = [db.get_image(img) for img in img_docs]
                  img_list.append(model.process_imgs(imgs))
              else:
                  img_list.append(model.process_imgs([blank_image]))
 
-             prompt = prompt_builder(q, text_docs)
-             print("prompt", prompt, "end")
+             prompt = prompt_builder(q, txt_docs)
              prompts.append(prompt)
+
 
         prompts = model.process_text(prompts)
         imgs = torch.stack(img_list, dim=0)
@@ -164,10 +187,10 @@ def evaluate_rag(data_loader, db, model, mmqa_retriever):
              answers[qid] = ans
              df['qid'].append(qid)
              df['A'].append(ans)
-        if ctr == 10:
-           break
-        ctr+=1
-    #write_results(df, answers)
+        #if ctr == 40:
+          #break
+        #ctr+=1
+    write_results(df, answers)
 
 evaluate_rag(data_loader, db, model, mmqa_retriever)
 #evaluate_ground_truth(data_loader, db, model)
