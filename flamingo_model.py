@@ -6,7 +6,7 @@ from accelerate import Accelerator
 from einops import repeat
 
 class FlamingoModel:
-    def __init__(self, lang_encoder, tokenizer, n_layers, device=None):
+    def __init__(self, lang_encoder, tokenizer, n_layers, ckpt_path="openflamingo/OpenFlamingo-4B-vitl-rpj3b-langinstruct", device=None):
         self.model, self.image_processor, self.tokenizer = create_model_and_transforms(
             clip_vision_encoder_path="ViT-L-14",
             clip_vision_encoder_pretrained="openai",
@@ -18,7 +18,7 @@ class FlamingoModel:
         self.device = self.accelerator.device
         print(self.device)
         self.args = [lang_encoder, tokenizer, n_layers]
-        checkpoint_path = hf_hub_download("openflamingo/OpenFlamingo-4B-vitl-rpj3b-langinstruct", "checkpoint.pt")
+        checkpoint_path = hf_hub_download(ckpt_path, "checkpoint.pt")
         self.model.load_state_dict(torch.load(checkpoint_path), strict=False)
         self.model = self.accelerator.prepare(self.model)
         self.is_main_process = self.accelerator.is_main_process
